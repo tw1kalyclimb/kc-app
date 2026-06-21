@@ -257,6 +257,12 @@
   .overview-charts { display: none; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
   .overview-charts.open { display: grid; }
 
+  /* ── Mode toggle ── */
+  .mode-toggle { display: flex; gap: 0; margin-bottom: 18px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .mode-btn { flex: 1; padding: 8px 0; border: none; background: white; color: var(--mid); cursor: pointer; font-size: 0.82rem; font-weight: 500; transition: background 0.15s, color 0.15s; }
+  .mode-btn.active { background: var(--sea); color: #fff; }
+  .mode-btn:not(.active):hover { background: var(--sea-light); }
+
   /* ── Generic bar chart ── */
   .bar-chart { display: flex; align-items: flex-end; gap: 1px; height: 52px; position: relative; }
   .bar-chart.week-chart { height: 60px; }
@@ -335,6 +341,11 @@
 
 <div class="app">
   <aside class="sidebar">
+    <div class="mode-toggle">
+      <button id="modeCrags" class="mode-btn active" onclick="setMode('crags')">Crags</button>
+      <button id="modeSectors" class="mode-btn" onclick="setMode('sectors')">Sectors</button>
+    </div>
+
     <h2>Grade Range</h2>
     <div class="filter-group">
       <div class="filter-label">Min <span id="gradeMinLabel">4a</span></div>
@@ -513,6 +524,8 @@ function computeSunSchedule(aspectDeg, year, month, day) {
 
 // ── App state ──────────────────────────────────────────────────────────────
 let allCrags = [], filteredCrags = [], expandedCrags = new Set();
+let allSectors = [], filteredSectors = [];
+let currentMode = 'crags';
 let currentDate = { year: 2024, month: 10, day: 15 }; // default Oct 15
 let sunScheduleCache = {}; // crag.id -> computed schedule for currentDate
 let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
@@ -556,6 +569,7 @@ async function loadData() {
     if (!resp.ok) throw new Error('not found');
     const data = await resp.json();
     allCrags = data.crags || [];
+    allSectors = buildSectors(allCrags);
     busynessWindowStart = data.meta?.busyness_window_start || '';
     const status = document.getElementById('dataStatus');
     const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '?' : d.toLocaleDateString('en-GB', {day:'numeric',month:'short'}); };
@@ -622,8 +636,51 @@ function computeDynBusyness(crags, minIdx, maxIdx) {
   crags.forEach((c, i) => { c._dynBusyness = raws[i] / maxRaw; });
 }
 
+function buildSectors(crags) {
+  const map = new Map();
+  for (const crag of crags) {
+    for (const route of (crag.routes || [])) {
+      const sName = route.sector || 'Unknown';
+      const key = `${crag.id ?? crag.name}||${sName}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: key, name: sName, cragName: crag.name,
+          displayName: `${crag.name} — ${sName}`,
+          ukc_url: crag.ukc_url, aspect_raw: crag.aspect_raw, aspect_deg: crag.aspect_deg,
+          routes: [],
+        });
+      }
+      map.get(key).routes.push(route);
+    }
+  }
+  const cutStr = (() => { const d = new Date(); d.setFullYear(d.getFullYear()-1); return d.toISOString().slice(0,10); })();
+  return Array.from(map.values()).map(s => {
+    const rs = s.routes;
+    s.route_count = rs.length;
+    const gis = rs.map(r => r.grade_sort ?? GRADE_IDX[r.grade] ?? 99).filter(g => g < 99);
+    s.grade_min = gis.length ? GRADES[Math.min(...gis)] : '?';
+    s.grade_max = gis.length ? GRADES[Math.max(...gis)] : '?';
+    const srs = rs.filter(r => r.star_rating > 0).map(r => r.star_rating);
+    s.avg_star_rating = srs.length ? srs.reduce((a,b)=>a+b,0)/srs.length : 0;
+    s.safe_route_count = rs.filter(r => r.bolt_status==='safe').length;
+    s.recent_log_count = rs.reduce((sum,r) => sum+(r.logs||[]).filter(d=>d>=cutStr).length, 0);
+    s.grades_histogram = {};
+    for (const r of rs) if (r.grade) s.grades_histogram[r.grade] = (s.grades_histogram[r.grade]||0)+1;
+    return s;
+  });
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeCrags').classList.toggle('active', mode==='crags');
+  document.getElementById('modeSectors').classList.toggle('active', mode==='sectors');
+  applyFilters();
+}
+
 function applyFilters(ov={}) {
   const f = {...getFilters(), ...ov};
+  if (currentMode === 'sectors') { applyFiltersSectors(f); return; }
+
   filteredCrags = allCrags.filter(crag => {
     const visibleInRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
@@ -663,6 +720,43 @@ function applyFilters(ov={}) {
   renderCrags(filteredCrags, f);
 }
 
+function applyFiltersSectors(f) {
+  filteredSectors = allSectors.filter(s => {
+    const visibleInRange = routesInRange(s, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
+      (r.bolt_status==='safe'&&f.boltSafe) ||
+      (r.bolt_status==='unknown'&&f.boltUnknown)
+    );
+    if (visibleInRange.length < f.minRoutes) return false;
+    if (s.avg_star_rating < f.minStars) return false;
+    const sched = getSunSchedule(s);
+    if (sched !== null) {
+      const sh = sched.totalSunHours;
+      if (sh < f.minSun || sh > f.maxSun) return false;
+    }
+    return true;
+  });
+
+  computeDynBusyness(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx);
+
+  filteredSectors.sort((a,b) => {
+    const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
+    const sunB = getSunSchedule(b)?.totalSunHours ?? 0;
+    switch(f.sortBy) {
+      case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
+      case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
+      case 'stars_desc':     return b.avg_star_rating - a.avg_star_rating;
+      case 'sun_desc':       return sunB - sunA;
+      case 'sun_asc':        return sunA - sunB;
+      case 'routes_desc':    return b.route_count - a.route_count;
+      case 'grade_asc':      return (GRADE_IDX[a.grade_min]??99) - (GRADE_IDX[b.grade_min]??99);
+      case 'name_asc':       return a.displayName.localeCompare(b.displayName);
+      default: return 0;
+    }
+  });
+
+  renderSectors(filteredSectors, f);
+}
+
 function resetFilters() {
   document.getElementById('gradeMin').value = 0;
   document.getElementById('gradeMax').value = 24;
@@ -688,6 +782,113 @@ function renderCrags(crags, filters) {
     return;
   }
   list.innerHTML = crags.map(c => cragCard(c, filters)).join('');
+}
+
+function renderSectors(sectors, filters) {
+  const list = document.getElementById('cragList');
+  document.getElementById('resultsCount').innerHTML = `<strong>${sectors.length}</strong> of ${allSectors.length} sectors`;
+  renderOverview(sectors, filters.gradeMinIdx, filters.gradeMaxIdx);
+  if (!sectors.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No sectors match these filters.</p></div>`;
+    return;
+  }
+  list.innerHTML = sectors.map(s => sectorCard(s, filters)).join('');
+}
+
+function sectorCard(sector, f) {
+  const routes = sector.routes || [];
+  const inRange = routesInRange(sector, f.gradeMinIdx, f.gradeMaxIdx);
+  const sched = getSunSchedule(sector);
+  const cardKey = String(sector.id).replace(/[^a-zA-Z0-9_-]/g, '-');
+
+  const b = sector._dynBusyness ?? 0;
+  const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
+  const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
+  const _stars = Math.min(5, Math.max(0, Math.round(sector.avg_star_rating || 0)));
+  const starsStr = '★'.repeat(_stars)+'☆'.repeat(5-_stars);
+  const gradeRange = sector.grade_min && sector.grade_max
+    ? (sector.grade_min===sector.grade_max ? sector.grade_min : `${sector.grade_min}–${sector.grade_max}`) : '?';
+
+  const hist = sector.grades_histogram || {};
+  const total = Object.values(hist).reduce((s,v)=>s+v,0);
+  const barSegs = GRADES.map((g,i) => {
+    const cnt = hist[g]||0; if (!cnt) return '';
+    const pct = (cnt/total*100).toFixed(1);
+    const fade = (i<f.gradeMinIdx||i>f.gradeMaxIdx)?'opacity:0.28;':'';
+    return `<div class="grade-seg" style="width:${pct}%;background:${gradeColor(i)};${fade}" data-tip="${g}: ${cnt}"></div>`;
+  }).join('');
+
+  const sunHtml = renderSunTimeline(sched, sector);
+  const sparkHtml = renderSparkline(routes, f.gradeMinIdx, f.gradeMaxIdx);
+  const normBusy = sector._dynBusyness != null ? `${(sector._dynBusyness*100).toFixed(0)}%` : '?';
+
+  const isExp = expandedCrags.has(cardKey);
+  const filteredRoutes = routes
+    .filter(r => (r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown))
+    .sort((a,b) => (a.grade_sort??99)-(b.grade_sort??99));
+
+  const makeRow = r => {
+    const inR = (r.grade_sort??99)>=f.gradeMinIdx && (r.grade_sort??99)<=f.gradeMaxIdx;
+    const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
+    const stars = '★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const vlBadge = r.vl_url
+      ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
+      : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
+    return `<tr style="${inR?'':'opacity:0.38'}">
+      <td>
+        ${r.name}
+        <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
+        ${vlBadge}
+      </td>
+      <td><span class="route-grade">${r.grade}</span></td>
+      <td><span class="stars-text">${stars}</span></td>
+      <td><span class="bolt-dot bolt-${r.bolt_status}"></span>${r.bolt_status}</td>
+      <td>${r.log_count}</td>
+    </tr>`;
+  };
+
+  const aspectBadge = sector.aspect_raw
+    ? `<span class="badge badge-aspect">faces ${sector.aspect_raw}</span>` : '';
+
+  return `<div class="crag-card" id="crag-${cardKey}">
+    <div class="crag-header">
+      <div>
+        <div class="crag-name"><a href="${sector.ukc_url}" target="_blank" rel="noopener">${sector.displayName}</a></div>
+        <div class="crag-badges">
+          <span class="badge badge-grade">${gradeRange}</span>
+          <span class="badge ${busyCls}">${busyLbl}</span>
+          <span class="badge badge-stars">${starsStr} ${sector.avg_star_rating.toFixed(1)}</span>
+          ${aspectBadge}
+          ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="crag-stats">
+      <div class="stat"><span class="stat-val">${sector.route_count}</span><span class="stat-label">Routes</span></div>
+      <div class="stat"><span class="stat-val">${sector.recent_log_count}</span><span class="stat-label">Logs (12mo)</span></div>
+      <div class="stat" title="Recent logs per route in selected grade range, normalised">
+        <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
+      </div>
+      <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe bolts</span></div>
+      ${sched ? `<div class="stat">
+        <span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span>
+        ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
+      </div>` : ''}
+    </div>
+    <div class="grade-bar">${barSegs}</div>
+    ${sunHtml}
+    ${sparkHtml}
+    <div class="routes-preview">
+      <button class="routes-toggle" onclick="toggleRoutes('${cardKey}')">
+        ${isExp ? '▲ Hide routes' : `▼ Show ${routes.length} routes`}
+      </button>
+      ${isExp ? renderCragHists(sector, f.gradeMinIdx, f.gradeMaxIdx) : ''}
+      ${isExp ? `<table class="routes-table" style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+        <thead><tr><th>Route</th><th>Grade</th><th>Stars</th><th>Bolts</th><th>Logs</th></tr></thead>
+        <tbody>${filteredRoutes.map(makeRow).join('')}</tbody>
+      </table>` : ''}
+    </div>
+  </div>`;
 }
 
 function cragCard(crag, f) {
