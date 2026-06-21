@@ -694,6 +694,8 @@ function cragCard(crag, f) {
   const routes = crag.routes || [];
   const inRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx);
   const sched   = getSunSchedule(crag);
+  // Stable string key that works for both numeric UKC ids and null VL-only crags
+  const cragKey = String(crag.id ?? crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
 
   const b = crag._dynBusyness ?? crag.normalised_busyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
@@ -722,7 +724,7 @@ function cragCard(crag, f) {
   const normBusy = crag._dynBusyness != null ? `${(crag._dynBusyness*100).toFixed(0)}%` : '?';
   const ageStr   = crag.crag_age_years ? `${crag.crag_age_years}yr old` : '';
 
-  const isExp = expandedCrags.has(crag.id);
+  const isExp = expandedCrags.has(cragKey);
   const filteredRoutes = routes
     .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown))
     .sort((a,b)=>(a.grade_sort??99)-(b.grade_sort??99));
@@ -766,7 +768,7 @@ function cragCard(crag, f) {
     ? `<span class="badge badge-aspect">faces ${crag.aspect_raw}</span>`
     : '';
 
-  return `<div class="crag-card" id="crag-${crag.id}">
+  return `<div class="crag-card" id="crag-${cragKey}">
     <div class="crag-header">
       <div>
         <div class="crag-name"><a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a></div>
@@ -809,7 +811,7 @@ function cragCard(crag, f) {
     ${sparkHtml}
 
     <div class="routes-preview">
-      <button class="routes-toggle" onclick="toggleRoutes('${crag.id}')">
+      <button class="routes-toggle" onclick="toggleRoutes('${cragKey}')">
         ${isExp ? '▲ Hide routes' : `▼ Show ${routes.length} routes`}
       </button>
       ${isExp ? renderCragHists(crag, f.gradeMinIdx, f.gradeMaxIdx) : ''}
@@ -885,25 +887,17 @@ function buildLogHistogram(dates) {
 function buildDowHistogram(dates) {
   const dts = dates.map(d => { try { return new Date(d); } catch { return null; } }).filter(Boolean);
   if (!dts.length) return Array(7).fill(0);
-  const earliest = new Date(dts.reduce((a,b) => a < b ? a : b));
-  const latest   = new Date(dts.reduce((a,b) => a > b ? a : b));
-  const occ = Array(7).fill(0);
-  for (let d = new Date(earliest); d <= latest; d.setDate(d.getDate()+1))
-    occ[(d.getDay()+6)%7]++;
   const raw = Array(7).fill(0);
   for (const dt of dts) raw[(dt.getDay()+6)%7]++;
-  return occ.map((o,i) => o ? Math.round(raw[i]/o*10000)/10000 : 0);
+  return raw;
 }
 
 function buildWeekHistogram(dates) {
   const dts = dates.map(d => { try { return new Date(d); } catch { return null; } }).filter(Boolean);
   if (!dts.length) return Array(53).fill(0);
-  const earliest = new Date(dts.reduce((a,b) => a < b ? a : b));
-  const latest   = new Date(dts.reduce((a,b) => a > b ? a : b));
-  const spanYears = Math.max(1, (latest - earliest) / (365.25*86400*1000));
   const raw = Array(53).fill(0);
   for (const dt of dts) { const w = getISOWeek(dt)-1; if (w>=0&&w<53) raw[w]++; }
-  return raw.map(v => Math.round(v/spanYears*10000)/10000);
+  return raw;
 }
 
 function renderSparkline(routes, minIdx, maxIdx) {
@@ -1131,7 +1125,8 @@ function renderBarChart(containerId, labelContainerId, values, opts = {}) {
       const sign  = delta >= 0 ? '+' : '';
       tip = labels[i] ? `${labels[i]}: ${sign}${delta}% vs avg` : `${sign}${delta}%`;
     } else {
-      tip = labels[i] ? `${labels[i]}: ${v.toFixed(3)}` : v.toFixed(3);
+      const count = Math.round(v).toLocaleString();
+      tip = labels[i] ? `${labels[i]}: ${count} logs` : `${count} logs`;
     }
     const dim  = highlightFn && !highlightFn(i) ? 'opacity:0.45;' : '';
     return `<div class="bc-bar" style="height:${pct}%;background:${col};${dim}" data-tip="${tip}"></div>`;
@@ -1200,7 +1195,6 @@ function renderOverview(crags, minIdx, maxIdx) {
     labelEvery: 1,
     highlightFn: i => i === tripDow,
     truncateAxis: true,
-    pctTooltip: true,
   });
 
   renderBarChart('aggWeekChart', 'aggWeekLabels', agg.week, {
@@ -1257,7 +1251,7 @@ function renderCragHists(crag, minIdx, maxIdx) {
       dow  = crag.dow_histogram;
       week = crag.week_histogram;
     }
-    if (dow)  renderBarChart(dowId,  dowLId,  dow,  { labels: DOW_LABELS,  labelEvery: 1, truncateAxis: true, pctTooltip: true });
+    if (dow)  renderBarChart(dowId,  dowLId,  dow,  { labels: DOW_LABELS,  labelEvery: 1, truncateAxis: true });
     if (week) renderBarChart(wkId,   wkLId,   week, { labels: WEEK_LABELS, labelEvery: 4, chartClass: 'week-chart' });
   }, 0);
 
