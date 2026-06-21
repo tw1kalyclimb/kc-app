@@ -100,9 +100,14 @@
   .ai-label {
     font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 0.08em; color: var(--mid); margin-bottom: 5px;
-    display: flex; align-items: center; gap: 5px;
+    display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
   }
+  .ai-label:hover { color: var(--rock); }
   .ai-label::before { content: '✦'; color: var(--sun); }
+  .ai-label .ai-toggle-arrow { margin-left: auto; font-size: 0.6rem; transition: transform 0.2s; }
+  .ai-label.open .ai-toggle-arrow { transform: rotate(180deg); }
+  .ai-body { display: none; }
+  .ai-body.open { display: block; margin-top: 8px; }
   .ai-input-row { display: flex; gap: 7px; }
   textarea#aiQuery {
     flex: 1; padding: 8px 11px; border: 1.5px solid var(--border);
@@ -404,18 +409,20 @@
   <div class="main-col">
     <!-- AI bar -->
     <div class="ai-bar">
-      <div class="ai-label">Ask AI</div>
-      <div class="ai-input-row">
-        <textarea id="aiQuery"
-          placeholder='e.g. "Quiet crags with 5+ routes under 6a, sunny in the morning, not too busy"'
-          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();runAiQuery()}"></textarea>
-        <button class="ai-submit" id="aiBtn" onclick="runAiQuery()">Ask →</button>
+      <div class="ai-label" onclick="toggleAiBar(this)">Ask AI <span class="ai-toggle-arrow">▲</span></div>
+      <div class="ai-body">
+        <div class="ai-input-row">
+          <textarea id="aiQuery"
+            placeholder='e.g. "Quiet crags with 5+ routes under 6a, sunny in the morning, not too busy"'
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();runAiQuery()}"></textarea>
+          <button class="ai-submit" id="aiBtn" onclick="runAiQuery()">Ask →</button>
+        </div>
+        <div class="api-key-row">
+          <label for="apiKey">Anthropic API key</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off">
+        </div>
+        <div class="ai-response" id="aiResponse"></div>
       </div>
-      <div class="api-key-row">
-        <label for="apiKey">Anthropic API key</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off">
-      </div>
-      <div class="ai-response" id="aiResponse"></div>
     </div>
 
     <!-- Date picker for sun calculations -->
@@ -860,14 +867,8 @@ function filteredLogDates(routes, minIdx, maxIdx) {
     const gs = r.grade_sort ?? 999;
     const inRange = gs >= minIdx && gs <= maxIdx;
     for (const log of (r.logs || [])) {
-      // If log has a grade tag, use it; otherwise fall back to the route's grade_sort
-      const logGs = log.grade != null ? (GRADE_IDX[log.grade] ?? 999) : gs;
-      if (logGs >= minIdx && logGs <= maxIdx) {
-        dates.push(log.date);
-      } else if (log.grade == null && inRange) {
-        // Old log without grade tag — inherit from parent route
-        dates.push(log.date);
-      }
+      // logs are now plain date strings
+      if (inRange) dates.push(log);
     }
   }
   return dates.filter(Boolean);
@@ -993,6 +994,13 @@ function updateSliderLabels() {
 });
 ['gradeMin','gradeMax','minRoutes','maxBusy','minStars','minSun','maxSun'].forEach(id=>
   document.getElementById(id).addEventListener('input', updateSliderLabels));
+
+// ── AI bar toggle ─────────────────────────────────────────────────────────
+function toggleAiBar(label) {
+  const body = label.nextElementSibling;
+  const open = body.classList.toggle('open');
+  label.classList.toggle('open', open);
+}
 
 // ── AI query ──────────────────────────────────────────────────────────────
 async function runAiQuery() {
