@@ -1,16 +1,17 @@
 {
   "meta": {
+    "primary_source": "ukc",
     "scraped_at": "2026-06-18T21:51:14.160009+00:00",
     "vl_scraped_at": "2026-06-20T06:59:34.449349+00:00",
     "rebolt_scraped_at": "2026-06-14T14:17:34.295575+00:00",
-    "processed_at": "2026-06-21T10:50:51.712388+00:00",
+    "processed_at": "2026-06-21T12:59:46.946408+00:00",
     "crag_count": 48,
     "route_count": 4467,
     "log_count": 627345,
     "recent_log_count": 145564,
     "busyness_window_start": "2024-06-21",
-    "vl_match_count": 3765,
-    "vl_routes_available": 4971
+    "vl_routes_available": 4971,
+    "match_count": 3765
   },
   "crags": [
     {

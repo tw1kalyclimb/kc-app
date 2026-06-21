@@ -1095,6 +1095,7 @@ No markdown, no preamble. Raw JSON only.`;
 function renderBarChart(containerId, labelContainerId, values, opts = {}) {
   const {
     labels = [],
+    tipLabels = [],
     labelEvery = 1,
     colorFn = null,         // (idx, relVal) => css colour
     highlightFn = null,     // (idx) => bool — makes bar slightly darker
@@ -1126,16 +1127,18 @@ function renderBarChart(containerId, labelContainerId, values, opts = {}) {
       tip = labels[i] ? `${labels[i]}: ${sign}${delta}% vs avg` : `${sign}${delta}%`;
     } else {
       const count = Math.round(v).toLocaleString();
-      tip = labels[i] ? `${labels[i]}: ${count} logs` : `${count} logs`;
+      const tipLbl = tipLabels[i] || labels[i];
+      tip = tipLbl ? `${tipLbl}: ${count} logs` : `${count} logs`;
     }
     const dim  = highlightFn && !highlightFn(i) ? 'opacity:0.45;' : '';
     return `<div class="bc-bar" style="height:${pct}%;background:${col};${dim}" data-tip="${tip}"></div>`;
   }).join('');
 
   if (labelContainer) {
+    const hasAnyLabel = labels.some(l => !!l);
     labelContainer.innerHTML = values.map((v, i) => {
       const lbl = labels[i] || '';
-      const show = i % labelEvery === 0;
+      const show = hasAnyLabel ? !!lbl : (i % labelEvery === 0);
       return `<div class="bc-label${show ? ' mark' : ''}">${show ? lbl : ''}</div>`;
     }).join('');
   }
@@ -1183,7 +1186,18 @@ function renderOverview(crags, minIdx, maxIdx) {
   panel.classList.add('visible');
 
   const DOW_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const WEEK_LABELS = Array.from({length:53}, (_,i) => `W${i+1}`);
+  const _WMS = [0,4,8,13,17,21,26,30,35,39,43,48];
+  const _WMF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEK_LABELS = (() => {
+    const a = Array(53).fill('');
+    _WMS.forEach((idx,m) => { a[idx] = 'JFMAMJJASOND'[m]; });
+    return a;
+  })();
+  const WEEK_TIP_LABELS = Array.from({length:53}, (_,i) => {
+    let m = _WMS.length - 1;
+    for (let j = 1; j < _WMS.length; j++) { if (_WMS[j] > i) { m = j-1; break; } }
+    return `${_WMF[m]} W${i - _WMS[m] + 1}`;
+  });
 
   // Find current trip week for highlight
   const tripDate = new Date(currentDate.year, currentDate.month - 1, currentDate.day);
@@ -1199,7 +1213,8 @@ function renderOverview(crags, minIdx, maxIdx) {
 
   renderBarChart('aggWeekChart', 'aggWeekLabels', agg.week, {
     labels: WEEK_LABELS,
-    labelEvery: 4,
+    tipLabels: WEEK_TIP_LABELS,
+    labelEvery: 1,
     chartClass: 'week-chart',
     highlightFn: i => i === tripWeek,
     colorFn: (i, rel) => {
@@ -1231,7 +1246,18 @@ function renderCragHists(crag, minIdx, maxIdx) {
   const routes = crag.routes || [];
 
   const DOW_LABELS  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const WEEK_LABELS = Array.from({length:53}, (_,i) => `W${i+1}`);
+  const _WMS = [0,4,8,13,17,21,26,30,35,39,43,48];
+  const _WMF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEK_LABELS = (() => {
+    const a = Array(53).fill('');
+    _WMS.forEach((idx,m) => { a[idx] = 'JFMAMJJASOND'[m]; });
+    return a;
+  })();
+  const WEEK_TIP_LABELS = Array.from({length:53}, (_,i) => {
+    let m = _WMS.length - 1;
+    for (let j = 1; j < _WMS.length; j++) { if (_WMS[j] > i) { m = j-1; break; } }
+    return `${_WMF[m]} W${i - _WMS[m] + 1}`;
+  });
 
   const dowId  = `dow-${crag.id}`;
   const dowLId = `dowL-${crag.id}`;
@@ -1252,7 +1278,7 @@ function renderCragHists(crag, minIdx, maxIdx) {
       week = crag.week_histogram;
     }
     if (dow)  renderBarChart(dowId,  dowLId,  dow,  { labels: DOW_LABELS,  labelEvery: 1, truncateAxis: true });
-    if (week) renderBarChart(wkId,   wkLId,   week, { labels: WEEK_LABELS, labelEvery: 4, chartClass: 'week-chart' });
+    if (week) renderBarChart(wkId,   wkLId,   week, { labels: WEEK_LABELS, tipLabels: WEEK_TIP_LABELS, labelEvery: 1, chartClass: 'week-chart' });
   }, 0);
 
   const dowHtml = `
