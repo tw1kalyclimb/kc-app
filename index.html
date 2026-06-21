@@ -330,7 +330,6 @@
 
 <header>
   <h1>⛰ Kalymnos Crag Finder</h1>
-  <span class="subtitle">UKC · Rebolt</span>
   <span class="data-status" id="dataStatus">Loading…</span>
 </header>
 
@@ -995,8 +994,14 @@ function updateSliderLabels() {
     el.classList.add('thumb-top');
   }, {passive: true});
 });
-['gradeMin','gradeMax','minRoutes','maxBusy','minStars','minSun','maxSun'].forEach(id=>
-  document.getElementById(id).addEventListener('input', updateSliderLabels));
+let _applyDebounce;
+['gradeMin','gradeMax','minRoutes','maxBusy','minStars','minSun','maxSun'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    updateSliderLabels();
+    clearTimeout(_applyDebounce);
+    _applyDebounce = setTimeout(applyFilters, 80);
+  });
+});
 
 // ── AI bar toggle ─────────────────────────────────────────────────────────
 function toggleAiBar(label) {
