@@ -353,14 +353,6 @@
       <input type="range" id="minRoutes" min="1" max="30" value="1">
     </div>
 
-    <h2>Busyness</h2>
-    <div class="filter-group">
-      <div class="filter-label">Maximum <span id="maxBusyLabel">Any</span></div>
-      <input type="range" id="maxBusy" min="0" max="10" value="10">
-      <div style="font-size:0.68rem;color:var(--mid);margin-top:4px">
-        Normalised by crag age — a 1-year-old crag with 50 logs scores higher than a 20-year-old crag with the same.
-      </div>
-    </div>
 
     <h2>Star Rating</h2>
     <div class="filter-group">
@@ -385,14 +377,12 @@
     <div class="check-group">
       <label class="check-label"><input type="checkbox" id="boltSafe" checked><span class="bolt-dot bolt-safe"></span> Safe / rebolted</label>
       <label class="check-label"><input type="checkbox" id="boltUnknown" checked><span class="bolt-dot bolt-unknown"></span> Unknown</label>
-      <label class="check-label"><input type="checkbox" id="boltUnsafe"><span class="bolt-dot bolt-unsafe"></span> Unsafe (hidden by default)</label>
     </div>
 
     <h2>Sort By</h2>
     <select id="sortBy">
-      <option value="norm_busy_asc">Quietest first (normalised)</option>
-      <option value="norm_busy_desc">Busiest first (normalised)</option>
-      <option value="busyness_asc">Quietest first (raw)</option>
+      <option value="norm_busy_asc">Quietest first</option>
+      <option value="norm_busy_desc">Busiest first</option>
       <option value="stars_desc">Highest rated first</option>
       <option value="sun_desc">Most sun first</option>
       <option value="sun_asc">Least sun first (shade seekers)</option>
@@ -525,6 +515,7 @@ function computeSunSchedule(aspectDeg, year, month, day) {
 let allCrags = [], filteredCrags = [], expandedCrags = new Set();
 let currentDate = { year: 2024, month: 10, day: 15 }; // default Oct 15
 let sunScheduleCache = {}; // crag.id -> computed schedule for currentDate
+let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
 
 // ── Date picker ───────────────────────────────────────────────────────────
 function initDatePicker() {
@@ -565,6 +556,7 @@ async function loadData() {
     if (!resp.ok) throw new Error('not found');
     const data = await resp.json();
     allCrags = data.crags || [];
+    busynessWindowStart = data.meta?.busyness_window_start || '';
     const status = document.getElementById('dataStatus');
     const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '?' : d.toLocaleDateString('en-GB', {day:'numeric',month:'short'}); };
     const ukcDate   = data.meta?.scraped_at      ? ` · UKC ${fmtDate(data.meta.scraped_at)}`      : '';
@@ -597,13 +589,11 @@ function getFilters() {
   return {
     gradeMinIdx: Math.min(a,b), gradeMaxIdx: Math.max(a,b),
     minRoutes:   parseInt(document.getElementById('minRoutes').value),
-    maxBusy:     parseInt(document.getElementById('maxBusy').value) / 10,
     minStars:    parseFloat(document.getElementById('minStars').value),
     minSun:      parseInt(document.getElementById('minSun').value),
     maxSun:      parseInt(document.getElementById('maxSun').value),
     boltSafe:    document.getElementById('boltSafe').checked,
     boltUnknown: document.getElementById('boltUnknown').checked,
-    boltUnsafe:  document.getElementById('boltUnsafe').checked,
     sortBy:      document.getElementById('sortBy').value,
   };
 }
@@ -615,12 +605,27 @@ function routesInRange(crag, minIdx, maxIdx) {
   });
 }
 
+function computeDynBusyness(crags, minIdx, maxIdx) {
+  const hasRawLogs = crags.some(c => (c.routes||[]).some(r => (r.logs||[]).length > 0));
+  if (!hasRawLogs) {
+    crags.forEach(c => { c._dynBusyness = c.normalised_busyness ?? 0; });
+    return;
+  }
+  const raws = crags.map(crag => {
+    const inRange = routesInRange(crag, minIdx, maxIdx);
+    if (!inRange.length) return 0;
+    const recentLogs = inRange.reduce((sum, r) =>
+      sum + (r.logs||[]).filter(d => !busynessWindowStart || d >= busynessWindowStart).length, 0);
+    return recentLogs / inRange.length;
+  });
+  const maxRaw = Math.max(...raws, 1e-9);
+  crags.forEach((c, i) => { c._dynBusyness = raws[i] / maxRaw; });
+}
+
 function applyFilters(ov={}) {
   const f = {...getFilters(), ...ov};
   filteredCrags = allCrags.filter(crag => {
     if (routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).length < f.minRoutes) return false;
-    const busy = crag.normalised_busyness ?? crag.busyness_score ?? 0;
-    if (busy > f.maxBusy) return false;
     if (crag.avg_star_rating < f.minStars) return false;
 
     // Sun filter (only applies if crag has aspect data)
@@ -633,20 +638,20 @@ function applyFilters(ov={}) {
 
     const anyBolt = (crag.routes||[]).some(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
-      (r.bolt_status==='unknown'&&f.boltUnknown) ||
-      (r.bolt_status==='unsafe'&&f.boltUnsafe)
+      (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if ((crag.routes||[]).length > 0 && !anyBolt) return false;
     return true;
   });
 
+  computeDynBusyness(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx);
+
   filteredCrags.sort((a,b) => {
     const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
     const sunB = getSunSchedule(b)?.totalSunHours ?? 0;
     switch(f.sortBy) {
-      case 'norm_busy_asc':  return (a.normalised_busyness??1) - (b.normalised_busyness??1);
-      case 'norm_busy_desc': return (b.normalised_busyness??0) - (a.normalised_busyness??0);
-      case 'busyness_asc':   return (a.busyness_score??1) - (b.busyness_score??1);
+      case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
+      case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
       case 'stars_desc':     return b.avg_star_rating - a.avg_star_rating;
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
@@ -664,13 +669,11 @@ function resetFilters() {
   document.getElementById('gradeMin').value = 0;
   document.getElementById('gradeMax').value = 24;
   document.getElementById('minRoutes').value = 1;
-  document.getElementById('maxBusy').value = 10;
   document.getElementById('minStars').value = 0;
   document.getElementById('minSun').value = 0;
   document.getElementById('maxSun').value = 12;
   document.getElementById('boltSafe').checked = true;
   document.getElementById('boltUnknown').checked = true;
-  document.getElementById('boltUnsafe').checked = false;
   document.getElementById('sortBy').value = 'norm_busy_asc';
   updateSliderLabels();
   document.getElementById('aiResponse').className = 'ai-response';
@@ -694,8 +697,7 @@ function cragCard(crag, f) {
   const inRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx);
   const sched   = getSunSchedule(crag);
 
-  // Busyness badge uses normalised busyness
-  const b = crag.normalised_busyness ?? crag.busyness_score ?? 0;
+  const b = crag._dynBusyness ?? crag.normalised_busyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
   const _cragStars = Math.min(5, Math.max(0, Math.round(crag.avg_star_rating || 0)));
@@ -719,13 +721,12 @@ function cragCard(crag, f) {
   // Log sparkline — filtered to grade range
   const sparkHtml = renderSparkline(crag.routes || [], f.gradeMinIdx, f.gradeMaxIdx);
 
-  // Busyness stats — show both normalised and raw
-  const normBusy = crag.normalised_busyness != null ? `${(crag.normalised_busyness*100).toFixed(0)}%` : '?';
+  const normBusy = crag._dynBusyness != null ? `${(crag._dynBusyness*100).toFixed(0)}%` : '?';
   const ageStr   = crag.crag_age_years ? `${crag.crag_age_years}yr old` : '';
 
   const isExp = expandedCrags.has(crag.id);
   const filteredRoutes = routes
-    .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown)||(r.bolt_status==='unsafe'&&f.boltUnsafe))
+    .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown))
     .sort((a,b)=>(a.grade_sort??99)-(b.grade_sort??99));
 
   // Group by sector, preserving order of first appearance
@@ -790,10 +791,9 @@ function cragCard(crag, f) {
         <span class="stat-val">${crag.recent_log_count}</span>
         <span class="stat-label">Logs (12mo)</span>
       </div>
-      <div class="stat" title="Logs/year normalised by crag age">
+      <div class="stat" title="Recent logs per route in selected grade range, normalised">
         <span class="stat-val">${normBusy}</span>
         <span class="stat-label">Busyness</span>
-        <span class="stat-sub">${ageStr}</span>
       </div>
       <div class="stat">
         <span class="stat-val">${crag.safe_route_count??'?'}</span>
@@ -956,8 +956,6 @@ function updateSliderLabels() {
   document.getElementById('gradeMinLabel').textContent = GRADES[Math.min(a,b)];
   document.getElementById('gradeMaxLabel').textContent = GRADES[Math.max(a,b)];
   document.getElementById('minRoutesLabel').textContent = document.getElementById('minRoutes').value;
-  const bv=parseInt(document.getElementById('maxBusy').value);
-  document.getElementById('maxBusyLabel').textContent = bv===10?'Any':(bv*10)+'%';
   const sv=parseFloat(document.getElementById('minStars').value);
   document.getElementById('minStarsLabel').textContent = sv===0?'Any':sv.toFixed(1)+'★';
   const minS=parseInt(document.getElementById('minSun').value);
@@ -995,7 +993,7 @@ function updateSliderLabels() {
   }, {passive: true});
 });
 let _applyDebounce;
-['gradeMin','gradeMax','minRoutes','maxBusy','minStars','minSun','maxSun'].forEach(id => {
+['gradeMin','gradeMax','minRoutes','minStars','minSun','maxSun'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     updateSliderLabels();
     clearTimeout(_applyDebounce);
@@ -1043,11 +1041,11 @@ async function runAiQuery() {
   const dateStr = `${currentDate.year}-${String(currentDate.month).padStart(2,'0')}-${String(currentDate.day).padStart(2,'0')}`;
   const system = `You are a Kalymnos climbing assistant. You have data on ${allCrags.length} crags for trip date ${dateStr}.
 French sport grades (index 0–24): ${GRADES.join(', ')}.
-Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, logs/yr relative to crag age — use this for busyness), busyness_score (raw), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (total sun hours on the trip date), sunny_from/sunny_until (local times).
+Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, dynamically computed from logs in the selected grade range), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (total sun hours on the trip date), sunny_from/sunny_until (local times).
 Interpret natural language queries. Return ONLY a JSON object with:
   "explanation": 1–2 sentence summary
   "crag_names": ordered array (best first, max 20)
-  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, maxBusy (0–10 int), minSun, maxSun (0–12 int), sortBy }
+  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, minSun, maxSun (0–12 int), sortBy }
 No markdown, no preamble. Raw JSON only.`;
 
   try {
@@ -1074,7 +1072,6 @@ No markdown, no preamble. Raw JSON only.`;
       if(fc.gradeMinIdx!==undefined) document.getElementById('gradeMin').value=fc.gradeMinIdx;
       if(fc.gradeMaxIdx!==undefined) document.getElementById('gradeMax').value=fc.gradeMaxIdx;
       if(fc.minRoutes!==undefined)   document.getElementById('minRoutes').value=fc.minRoutes;
-      if(fc.maxBusy!==undefined)     document.getElementById('maxBusy').value=fc.maxBusy;
       if(fc.minSun!==undefined)      document.getElementById('minSun').value=fc.minSun;
       if(fc.maxSun!==undefined)      document.getElementById('maxSun').value=fc.maxSun;
       if(fc.sortBy!==undefined)      document.getElementById('sortBy').value=fc.sortBy;
