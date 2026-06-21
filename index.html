@@ -277,6 +277,12 @@
     padding: 3px 6px; border-radius: 4px; font-size: 0.69rem; white-space: nowrap; z-index: 20;
     pointer-events: none;
   }
+  @media (hover: none) {
+    .bc-bar:hover::after,
+    .grade-seg:hover::after,
+    .sun-seg:hover::after,
+    .spark-bar:hover::after { content: none; }
+  }
   .bar-chart-labels { display: flex; gap: 1px; margin-top: 2px; }
   .bc-label { flex: 1; font-size: 0.57rem; color: #bbb; text-align: center; overflow: hidden; white-space: nowrap; }
   .bc-label.mark { color: var(--mid); font-weight: 600; }
@@ -307,6 +313,7 @@
   }
   .sector-header-row:first-child td { border-top: none; }
   .route-grade { font-family: var(--font-mono); font-weight: 700; }
+  .route-grade-alt { font-family: var(--font-mono); font-weight: 400; color: var(--mid); font-size: 0.85em; }
   .bolt-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; }
   .bolt-safe    { background: var(--safe); }
   .bolt-unsafe  { background: var(--unsafe); }
@@ -848,7 +855,7 @@ function sectorCard(sector, f) {
         <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
         ${vlBadge}
       </td>
-      <td><span class="route-grade">${r.grade}</span></td>
+      <td>${r.vl_grade ? `<span class="route-grade">${r.grade}</span><span class="route-grade-alt" title="VL grade"> / ${r.vl_grade}</span>` : `<span class="route-grade">${r.grade}</span>`}</td>
       <td><span class="stars-text">${stars}</span></td>
       <td><span class="bolt-dot bolt-${r.bolt_status}"></span>${r.bolt_status}</td>
       <td>${r.log_count}</td>
@@ -960,7 +967,7 @@ function cragCard(crag, f) {
         <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
         ${vlBadge}
       </td>
-      <td><span class="route-grade">${r.grade}</span></td>
+      <td>${r.vl_grade ? `<span class="route-grade">${r.grade}</span><span class="route-grade-alt" title="VL grade"> / ${r.vl_grade}</span>` : `<span class="route-grade">${r.grade}</span>`}</td>
       <td><span class="stars-text">${stars}</span></td>
       <td><span class="bolt-dot bolt-${r.bolt_status}"></span>${r.bolt_status}</td>
       <td>${r.log_count}</td>
