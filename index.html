@@ -625,7 +625,11 @@ function computeDynBusyness(crags, minIdx, maxIdx) {
 function applyFilters(ov={}) {
   const f = {...getFilters(), ...ov};
   filteredCrags = allCrags.filter(crag => {
-    if (routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).length < f.minRoutes) return false;
+    const visibleInRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
+      (r.bolt_status==='safe'&&f.boltSafe) ||
+      (r.bolt_status==='unknown'&&f.boltUnknown)
+    );
+    if (visibleInRange.length < f.minRoutes) return false;
     if (crag.avg_star_rating < f.minStars) return false;
 
     // Sun filter (only applies if crag has aspect data)
@@ -635,12 +639,6 @@ function applyFilters(ov={}) {
       if (sh < f.minSun) return false;
       if (sh > f.maxSun) return false;
     }
-
-    const anyBolt = (crag.routes||[]).some(r =>
-      (r.bolt_status==='safe'&&f.boltSafe) ||
-      (r.bolt_status==='unknown'&&f.boltUnknown)
-    );
-    if ((crag.routes||[]).length > 0 && !anyBolt) return false;
     return true;
   });
 
