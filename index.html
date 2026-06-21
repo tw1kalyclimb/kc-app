@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalymnos Crag Finder</title>
+<style>
+  :root {
+    --rock:      #2a2420;
+    --chalk:     #f5f0e8;
+    --sea:       #1e6fa0;
+    --sea-light: #d4ebf7;
+    --sun:       #e8a020;
+    --sun-light: #fff8e6;
+    --shade:     #b0c8e0;
+    --safe:      #2d7a4a;
+    --unsafe:    #b03030;
+    --unknown:   #888;
+    --mid:       #6b5d52;
+    --card-bg:   #ffffff;
+    --border:    #ddd8d0;
+    --radius:    6px;
+    --font-ui:   'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-ui); background: var(--chalk); color: var(--rock); min-height: 100vh; }
+
+  header {
+    background: var(--rock); color: var(--chalk);
+    padding: 16px 24px; display: flex; align-items: baseline; gap: 14px;
+    border-bottom: 3px solid var(--sun);
+  }
+  header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+  header .subtitle { font-size: 0.8rem; color: #b0a898; }
+  .data-status { margin-left: auto; font-size: 0.73rem; color: #b0a898; }
+  .data-status.sample { color: var(--sun); }
+
+  .app { display: grid; grid-template-columns: 268px 1fr; min-height: calc(100vh - 55px); }
+
+  .sidebar {
+    background: #fff; border-right: 1px solid var(--border);
+    padding: 18px 16px; overflow-y: auto;
+    max-height: calc(100vh - 55px); position: sticky; top: 0;
+  }
+  .sidebar h2 {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--mid); margin-bottom: 12px; margin-top: 20px;
+  }
+  .sidebar h2:first-child { margin-top: 0; }
+
+  .filter-group { margin-bottom: 16px; }
+  .filter-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 500; margin-bottom: 5px; }
+  .filter-label span { color: var(--sea); font-weight: 700; font-family: var(--font-mono); font-size: 0.78rem; }
+
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 4px;
+    border-radius: 2px; background: var(--border); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+    background: var(--sea); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  }
+
+  .grade-range-wrap { position: relative; height: 30px; }
+  .grade-range-wrap input[type=range] { position: absolute; top: 13px; pointer-events: none; z-index: 1; background: transparent; }
+  .grade-range-wrap input[type=range]::-webkit-slider-runnable-track { background: transparent; }
+  .grade-range-wrap input[type=range].thumb-top { z-index: 3; }
+  .grade-range-wrap input[type=range]::-webkit-slider-thumb { pointer-events: all; }
+  #gradeTrackBg { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; left: 7px; right: 7px; background: var(--border); border-radius: 2px; pointer-events: none; z-index: 0; }
+  #gradeTrack { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: var(--sea); border-radius: 2px; pointer-events: none; z-index: 2; }
+
+  .check-group { display: flex; flex-direction: column; gap: 7px; }
+  .check-label { display: flex; align-items: center; gap: 7px; font-size: 0.81rem; cursor: pointer; }
+  .check-label input { accent-color: var(--sea); width: 13px; height: 13px; }
+
+  select {
+    width: 100%; padding: 6px 9px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-size: 0.81rem; font-family: var(--font-ui);
+    background: white; color: var(--rock); cursor: pointer;
+  }
+
+  .apply-btn {
+    width: 100%; margin-top: 18px; padding: 9px; background: var(--sea);
+    color: white; border: none; border-radius: var(--radius); font-size: 0.87rem;
+    font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .apply-btn:hover { background: #1a5f8c; }
+  .reset-btn {
+    width: 100%; margin-top: 7px; padding: 7px; background: transparent;
+    color: var(--mid); border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 0.8rem; cursor: pointer;
+  }
+  .reset-btn:hover { border-color: var(--mid); }
+
+  .main-col { display: flex; flex-direction: column; overflow: hidden; }
+
+  /* ── AI bar ── */
+  .ai-bar { padding: 12px 22px; background: #fff; border-bottom: 1px solid var(--border); }
+  .ai-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--mid); margin-bottom: 5px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ai-label::before { content: '✦'; color: var(--sun); }
+  .ai-input-row { display: flex; gap: 7px; }
+  textarea#aiQuery {
+    flex: 1; padding: 8px 11px; border: 1.5px solid var(--border);
+    border-radius: var(--radius); font-size: 0.86rem; font-family: var(--font-ui);
+    resize: none; height: 50px; background: var(--chalk);
+  }
+  textarea#aiQuery:focus { outline: none; border-color: var(--sea); background: white; }
+  textarea#aiQuery::placeholder { color: #aaa; }
+  .ai-submit {
+    padding: 0 16px; height: 50px; background: var(--rock); color: var(--chalk);
+    border: none; border-radius: var(--radius); font-size: 0.86rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .ai-submit:hover { background: #3d3530; }
+  .ai-submit:disabled { opacity: 0.5; cursor: wait; }
+  .api-key-row { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+  .api-key-row label { font-size: 0.73rem; color: var(--mid); white-space: nowrap; }
+  .api-key-row input {
+    flex: 1; padding: 4px 7px; border: 1px solid var(--border); border-radius: 4px;
+    font-size: 0.76rem; font-family: var(--font-mono); background: var(--chalk);
+  }
+  .ai-response {
+    margin-top: 7px; padding: 9px 13px; background: var(--sea-light);
+    border-left: 3px solid var(--sea); border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 0.83rem; line-height: 1.5; display: none;
+  }
+  .ai-response.visible { display: block; }
+  .ai-response.error { background: #fdecea; border-color: var(--unsafe); }
+
+  /* ── Date picker ── */
+  .date-bar {
+    padding: 9px 22px; background: var(--sun-light); border-bottom: 1px solid #f0d090;
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .date-bar label { font-size: 0.78rem; font-weight: 600; color: var(--rock); white-space: nowrap; }
+  .date-bar input[type=date] {
+    padding: 4px 8px; border: 1px solid #d0b060; border-radius: var(--radius);
+    font-size: 0.81rem; font-family: var(--font-ui); background: white; cursor: pointer;
+  }
+  .date-bar .date-hint { font-size: 0.73rem; color: var(--mid); }
+  .date-bar .sun-time-local { font-size: 0.73rem; color: var(--mid); }
+
+  /* ── Results ── */
+  .results { padding: 18px 22px; overflow-y: auto; flex: 1; }
+  .results-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .results-count { font-size: 0.81rem; color: var(--mid); }
+  .results-count strong { color: var(--rock); }
+
+  /* ── Crag card ── */
+  .crag-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 11px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .crag-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-color: #c8c0b8; }
+  .crag-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .crag-name { font-size: 1.02rem; font-weight: 700; }
+  .crag-name a { color: var(--rock); text-decoration: none; }
+  .crag-name a:hover { color: var(--sea); }
+  .crag-badges { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+  .badge {
+    font-size: 0.7rem; font-weight: 600; padding: 2px 7px;
+    border-radius: 20px; font-family: var(--font-mono); white-space: nowrap;
+  }
+  .badge-grade  { background: var(--rock); color: var(--chalk); }
+  .badge-stars  { background: #fef3e2; color: #a06010; border: 1px solid #f0d090; }
+  .badge-busy-low  { background: #e8f5e9; color: #2e7d32; }
+  .badge-busy-mid  { background: #fff8e1; color: #f57f17; }
+  .badge-busy-high { background: #fce4e4; color: #b71c1c; }
+  .badge-aspect { background: #f0f4ff; color: #3050a0; border: 1px solid #c0d0f0; }
+  .badge-ukc { background: #1e4d8c; color: #fff; text-decoration: none; font-size: 0.62rem; padding: 1px 5px; }
+  .badge-ukc:hover { background: #163a6a; }
+  .badge-vl  { background: #e8401a; color: #fff; text-decoration: none; font-size: 0.62rem; padding: 1px 5px; }
+  .badge-vl:hover  { background: #c23214; }
+  .badge-vl-unmatched { background: #ddd; color: #888; font-size: 0.62rem; padding: 1px 5px; cursor: default; }
+
+  .crag-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 0.78rem; color: var(--mid); flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; }
+  .stat-val { font-size: 1.05rem; font-weight: 700; color: var(--rock); line-height: 1.2; }
+  .stat-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-sub { font-size: 0.67rem; color: var(--mid); }
+
+  /* Grade bar */
+  .grade-bar { display: flex; gap: 2px; margin-top: 11px; height: 18px; border-radius: 3px; overflow: hidden; }
+  .grade-seg {
+    height: 100%; cursor: default; position: relative; transition: opacity 0.2s;
+  }
+  .grade-seg:hover::after {
+    content: attr(data-tip); position: absolute; top: 22px; left: 50%;
+    transform: translateX(-50%); background: var(--rock); color: white;
+    padding: 3px 7px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; z-index: 10;
+  }
+
+  /* Sun/shade timeline */
+  .sun-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 10px;
+  }
+  .sun-label { font-size: 0.7rem; color: var(--mid); white-space: nowrap; min-width: 60px; }
+  .sun-timeline { display: flex; flex: 1; height: 18px; border-radius: 3px; overflow: hidden; gap: 1px; }
+  .sun-seg {
+    flex: 1; height: 100%; position: relative; cursor: default;
+  }
+  .sun-seg.sunny  { background: var(--sun); }
+  .sun-seg.shade  { background: var(--shade); opacity: 0.5; }
+  .sun-seg.norise { background: #e8e0d8; opacity: 0.3; }
+  .sun-seg:hover::after {
+    content: attr(data-tip); position: absolute; top: 22px; left: 50%;
+    transform: translateX(-50%); background: var(--rock); color: white;
+    padding: 3px 7px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; z-index: 10;
+  }
+  .sun-info { font-size: 0.72rem; color: var(--mid); white-space: nowrap; }
+  .sun-info.good { color: var(--sun); font-weight: 600; }
+  .sun-info.none { color: #aaa; }
+  .now-marker {
+    position: absolute; top: 0; width: 2px; height: 100%;
+    background: red; opacity: 0.7; pointer-events: none;
+  }
+
+  /* Log sparkline */
+  .sparkline-row { display: flex; align-items: flex-end; gap: 2px; margin-top: 8px; height: 28px; }
+  .spark-bar {
+    flex: 1; background: var(--sea); opacity: 0.55; border-radius: 1px 1px 0 0;
+    min-width: 3px; cursor: default; position: relative; transition: opacity 0.15s;
+  }
+  .spark-bar:hover { opacity: 1; }
+  .spark-bar.recent { background: var(--sea); opacity: 0.85; }
+  .spark-bar:hover::after {
+    content: attr(data-tip); position: absolute; bottom: 110%; left: 50%;
+    transform: translateX(-50%); background: var(--rock); color: white;
+    padding: 3px 7px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; z-index: 10;
+  }
+
+  /* ── Aggregate overview panel ── */
+  .overview-panel {
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 12px 22px; display: none;
+  }
+  .overview-panel.visible { display: block; }
+  .overview-toggle {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--mid);
+    display: flex; align-items: center; gap: 7px; cursor: pointer; user-select: none;
+    background: none; border: none; font-family: var(--font-ui); padding: 0; width: 100%;
+  }
+  .overview-toggle .arrow { font-size: 0.58rem; transition: transform 0.2s; display: inline-block; }
+  .overview-toggle.open .arrow { transform: rotate(90deg); }
+  .overview-charts { display: none; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  .overview-charts.open { display: grid; }
+
+  /* ── Generic bar chart ── */
+  .bar-chart { display: flex; align-items: flex-end; gap: 1px; height: 52px; position: relative; }
+  .bar-chart.week-chart { height: 60px; }
+  .bc-bar {
+    flex: 1; min-width: 2px; border-radius: 1px 1px 0 0;
+    cursor: default; position: relative; transition: opacity 0.15s;
+  }
+  .bc-bar:hover { opacity: 0.7 !important; }
+  .bc-bar:hover::after {
+    content: attr(data-tip); position: absolute; bottom: 110%; left: 50%;
+    transform: translateX(-50%); background: var(--rock); color: white;
+    padding: 3px 6px; border-radius: 4px; font-size: 0.69rem; white-space: nowrap; z-index: 20;
+    pointer-events: none;
+  }
+  .bar-chart-labels { display: flex; gap: 1px; margin-top: 2px; }
+  .bc-label { flex: 1; font-size: 0.57rem; color: #bbb; text-align: center; overflow: hidden; white-space: nowrap; }
+  .bc-label.mark { color: var(--mid); font-weight: 600; }
+  .chart-section-label {
+    font-size: 0.68rem; color: var(--mid); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px;
+  }
+  .crag-hists {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+
+  /* Routes table */
+  .routes-preview { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 9px; }
+  .routes-toggle { font-size: 0.76rem; color: var(--sea); cursor: pointer; background: none; border: none; padding: 0; font-family: var(--font-ui); }
+  .routes-toggle:hover { text-decoration: underline; }
+  .routes-table { width: 100%; border-collapse: collapse; font-size: 0.76rem; margin-top: 7px; }
+  .routes-table th {
+    text-align: left; font-weight: 600; color: var(--mid); padding: 3px 7px;
+    border-bottom: 1px solid var(--border); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .routes-table td { padding: 4px 7px; border-bottom: 1px solid #f0ece6; vertical-align: middle; }
+  .routes-table tr:last-child td { border-bottom: none; }
+  .sector-header-row td {
+    padding: 6px 7px 3px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--mid); background: var(--chalk);
+    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border);
+  }
+  .sector-header-row:first-child td { border-top: none; }
+  .route-grade { font-family: var(--font-mono); font-weight: 700; }
+  .bolt-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; }
+  .bolt-safe    { background: var(--safe); }
+  .bolt-unsafe  { background: var(--unsafe); }
+  .bolt-unknown { background: var(--unknown); }
+  .stars-text   { color: var(--sun); letter-spacing: -1px; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--mid); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty-state code { background: #eee; padding: 2px 5px; border-radius: 3px; }
+
+  .loading-bar {
+    height: 3px; background: linear-gradient(90deg, var(--sea), var(--sun), var(--sea));
+    background-size: 200% 100%; animation: shimmer 1.2s infinite linear;
+    border-radius: 2px; margin-bottom: 14px; display: none;
+  }
+  .loading-bar.active { display: block; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .ai-highlight { background: #fffbe6 !important; border-color: #f0d060 !important; }
+
+  @media(max-width:768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { max-height: none; position: static; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⛰ Kalymnos Crag Finder</h1>
+  <span class="subtitle">UKC · Rebolt</span>
+  <span class="data-status" id="dataStatus">Loading…</span>
+</header>
+
+<div class="app">
+  <aside class="sidebar">
+    <h2>Grade Range</h2>
+    <div class="filter-group">
+      <div class="filter-label">Min <span id="gradeMinLabel">4a</span></div>
+      <div class="filter-label">Max <span id="gradeMaxLabel">8b</span></div>
+      <div class="grade-range-wrap">
+        <div id="gradeTrackBg"></div>
+        <div id="gradeTrack"></div>
+        <input type="range" id="gradeMin" min="0" max="24" value="0">
+        <input type="range" id="gradeMax" min="0" max="24" value="24">
+      </div>
+    </div>
+
+    <h2>Routes in Grade Range</h2>
+    <div class="filter-group">
+      <div class="filter-label">Minimum <span id="minRoutesLabel">1</span></div>
+      <input type="range" id="minRoutes" min="1" max="30" value="1">
+    </div>
+
+    <h2>Busyness</h2>
+    <div class="filter-group">
+      <div class="filter-label">Maximum <span id="maxBusyLabel">Any</span></div>
+      <input type="range" id="maxBusy" min="0" max="10" value="10">
+      <div style="font-size:0.68rem;color:var(--mid);margin-top:4px">
+        Normalised by crag age — a 1-year-old crag with 50 logs scores higher than a 20-year-old crag with the same.
+      </div>
+    </div>
+
+    <h2>Star Rating</h2>
+    <div class="filter-group">
+      <div class="filter-label">Minimum avg <span id="minStarsLabel">Any</span></div>
+      <input type="range" id="minStars" min="0" max="3" value="0" step="0.5">
+    </div>
+
+    <h2>Sun Preference</h2>
+    <div class="filter-group">
+      <div class="filter-label">Min sun hours <span id="minSunLabel">Any</span></div>
+      <input type="range" id="minSun" min="0" max="12" value="0" step="1">
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Max sun hours <span id="maxSunLabel">Any</span></div>
+      <input type="range" id="maxSun" min="0" max="12" value="12" step="1">
+      <div style="font-size:0.68rem;color:var(--mid);margin-top:4px">
+        Use max sun for shady crags on hot days.
+      </div>
+    </div>
+
+    <h2>Bolt Safety</h2>
+    <div class="check-group">
+      <label class="check-label"><input type="checkbox" id="boltSafe" checked><span class="bolt-dot bolt-safe"></span> Safe / rebolted</label>
+      <label class="check-label"><input type="checkbox" id="boltUnknown" checked><span class="bolt-dot bolt-unknown"></span> Unknown</label>
+      <label class="check-label"><input type="checkbox" id="boltUnsafe"><span class="bolt-dot bolt-unsafe"></span> Unsafe (hidden by default)</label>
+    </div>
+
+    <h2>Sort By</h2>
+    <select id="sortBy">
+      <option value="norm_busy_asc">Quietest first (normalised)</option>
+      <option value="norm_busy_desc">Busiest first (normalised)</option>
+      <option value="busyness_asc">Quietest first (raw)</option>
+      <option value="stars_desc">Highest rated first</option>
+      <option value="sun_desc">Most sun first</option>
+      <option value="sun_asc">Least sun first (shade seekers)</option>
+      <option value="routes_desc">Most routes first</option>
+      <option value="grade_asc">Easiest grade first</option>
+      <option value="name_asc">Name A–Z</option>
+    </select>
+
+    <button class="apply-btn" onclick="applyFilters()">Apply Filters</button>
+    <button class="reset-btn" onclick="resetFilters()">Reset</button>
+  </aside>
+
+  <div class="main-col">
+    <!-- AI bar -->
+    <div class="ai-bar">
+      <div class="ai-label">Ask AI</div>
+      <div class="ai-input-row">
+        <textarea id="aiQuery"
+          placeholder='e.g. "Quiet crags with 5+ routes under 6a, sunny in the morning, not too busy"'
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();runAiQuery()}"></textarea>
+        <button class="ai-submit" id="aiBtn" onclick="runAiQuery()">Ask →</button>
+      </div>
+      <div class="api-key-row">
+        <label for="apiKey">Anthropic API key</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off">
+      </div>
+      <div class="ai-response" id="aiResponse"></div>
+    </div>
+
+    <!-- Date picker for sun calculations -->
+    <div class="date-bar">
+      <label for="tripDate">☀ Trip date</label>
+      <input type="date" id="tripDate">
+      <span class="date-hint">Sun/shade times update for your selected date</span>
+      <span class="sun-time-local" id="localTimeInfo"></span>
+    </div>
+
+    <!-- Overview aggregate panel -->
+    <div class="overview-panel" id="overviewPanel">
+      <button class="overview-toggle" id="overviewToggle" onclick="toggleOverview()">
+        <span class="arrow">▶</span>
+        Overall busyness patterns — all crags
+      </button>
+      <div class="overview-charts" id="overviewCharts">
+        <div>
+          <div class="chart-section-label">Average busyness by day of week</div>
+          <div class="bar-chart" id="aggDowChart"></div>
+          <div class="bar-chart-labels" id="aggDowLabels"></div>
+        </div>
+        <div>
+          <div class="chart-section-label">Average busyness by week of year</div>
+          <div class="bar-chart week-chart" id="aggWeekChart"></div>
+          <div class="bar-chart-labels" id="aggWeekLabels"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results">
+      <div class="loading-bar" id="loadingBar"></div>
+      <div class="results-header">
+        <span class="results-count" id="resultsCount"></span>
+      </div>
+      <div id="cragList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────
+const GRADES = ["4a","4b","4c","4c+","5a","5a+","5b","5b+","5c","5c+","6a","6a+","6b","6b+","6c","6c+","7a","7a+","7b","7b+","7c","7c+","8a","8a+","8b"];
+const GRADE_IDX = Object.fromEntries(GRADES.map((g,i)=>[g,i]));
+const KALYMNOS_LAT = 37.0, KALYMNOS_LON = 26.98;
+
+function gradeColor(idx) {
+  const t = idx / (GRADES.length - 1);
+  if (t < 0.35) return `hsl(${120-t*80},55%,${48+t*10}%)`;
+  if (t < 0.65) return `hsl(${90-t*200},65%,50%)`;
+  return `hsl(0,72%,${48-(t-0.65)*18}%)`;
+}
+
+// ── Sun math (matches Python scraper exactly) ─────────────────────────────
+function sunPosition(latDeg, lonDeg, year, month, day, hourUtc) {
+  const lat = latDeg * Math.PI / 180;
+  const N1 = Math.floor(275*month/9);
+  const N2 = Math.floor((month+9)/12);
+  const N3 = 1 + Math.floor((year - 4*Math.floor(year/4) + 2)/3);
+  const N  = N1 - N2*N3 + day - 30;
+  const B  = (360/365*(N-81)) * Math.PI/180;
+  const EoT = 9.87*Math.sin(2*B) - 7.53*Math.cos(B) - 1.5*Math.sin(B);
+  const solarTime = hourUtc*60 + 4*lonDeg + EoT;
+  const HRA = (0.25*(solarTime-720)) * Math.PI/180;
+  const dec = (23.45*Math.sin((360/365*(N-81))*Math.PI/180)) * Math.PI/180;
+  const cosZ = Math.sin(lat)*Math.sin(dec) + Math.cos(lat)*Math.cos(dec)*Math.cos(HRA);
+  const elev = Math.asin(Math.max(-1,Math.min(1,cosZ))) * 180/Math.PI;
+  let az = 0;
+  if (elev > -0.833) {
+    const se = Math.max(0.01, Math.abs(elev)) * Math.PI/180;
+    const cosAz = (Math.sin(dec)*Math.cos(lat) - Math.cos(dec)*Math.sin(lat)*Math.cos(HRA)) / Math.cos(se);
+    az = Math.acos(Math.max(-1,Math.min(1,cosAz))) * 180/Math.PI;
+    if (solarTime > 720) az = 360 - az;
+  }
+  return [Math.round(az*10)/10, Math.round(elev*10)/10];
+}
+
+function computeSunSchedule(aspectDeg, year, month, day) {
+  if (aspectDeg == null) return null;
+  const schedule = [];
+  for (let hLocal = 6; hLocal <= 20; hLocal++) {
+    const hUtc = hLocal - 3; // EEST = UTC+3
+    const [az, alt] = sunPosition(KALYMNOS_LAT, KALYMNOS_LON, year, month, day, hUtc);
+    const diff = Math.abs(az - aspectDeg) % 360;
+    const angDiff = diff <= 180 ? diff : 360 - diff;
+    const isSunny = alt > 5 && angDiff <= 90;
+    schedule.push([hLocal, az, alt, isSunny]);
+  }
+  const sunnyHours = schedule.filter(s=>s[3]).map(s=>s[0]);
+  return {
+    aspectDeg,
+    sunHours: schedule,
+    sunnyFrom:  sunnyHours.length ? `${String(sunnyHours[0]).padStart(2,'0')}:00` : null,
+    sunnyUntil: sunnyHours.length ? `${String(sunnyHours[sunnyHours.length-1]+1).padStart(2,'0')}:00` : null,
+    totalSunHours: sunnyHours.length,
+  };
+}
+
+// ── App state ──────────────────────────────────────────────────────────────
+let allCrags = [], filteredCrags = [], expandedCrags = new Set();
+let currentDate = { year: 2024, month: 10, day: 15 }; // default Oct 15
+let sunScheduleCache = {}; // crag.id -> computed schedule for currentDate
+
+// ── Date picker ───────────────────────────────────────────────────────────
+function initDatePicker() {
+  const today = new Date();
+  // Default to next Oct 15 (or this year's if in future)
+  const y = today.getMonth() >= 9 ? today.getFullYear() + 1 : today.getFullYear();
+  const defaultDate = `${y}-10-15`;
+  document.getElementById('tripDate').value = defaultDate;
+  onDateChange();
+}
+
+function onDateChange() {
+  const val = document.getElementById('tripDate').value;
+  if (!val) return;
+  const [y,m,d] = val.split('-').map(Number);
+  currentDate = { year: y, month: m, day: d };
+  sunScheduleCache = {}; // invalidate cache
+  applyFilters();
+  // Re-render overview so trip-week highlight updates
+  renderOverview(filteredCrags);
+}
+document.getElementById('tripDate').addEventListener('change', onDateChange);
+
+function getSunSchedule(crag) {
+  if (crag.aspect_deg == null) return null;
+  const key = `${crag.id}-${currentDate.year}-${currentDate.month}-${currentDate.day}`;
+  if (!sunScheduleCache[key]) {
+    sunScheduleCache[key] = computeSunSchedule(crag.aspect_deg, currentDate.year, currentDate.month, currentDate.day);
+  }
+  return sunScheduleCache[key];
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────
+async function loadData() {
+  setLoading(true);
+  try {
+    const resp = await fetch('data.json');
+    if (!resp.ok) throw new Error('not found');
+    const data = await resp.json();
+    allCrags = data.crags || [];
+    const status = document.getElementById('dataStatus');
+    const d = new Date(data.meta?.scraped_at);
+    const ds = isNaN(d) ? '' : ` · scraped ${d.toLocaleDateString()}`;
+    if (data.meta?.is_sample_data) {
+      status.textContent = `⚠ Sample data${ds}`; status.className = 'data-status sample';
+    } else {
+      status.textContent = `${allCrags.length} crags${ds}`; status.className = 'data-status';
+    }
+    applyFilters();
+  } catch(e) {
+    document.getElementById('cragList').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📂</div>
+        <p><strong>data.json not found</strong></p>
+        <p style="margin-top:8px">Run <code>python scraper.py</code> then place <code>data.json</code> next to <code>index.html</code>.<br>
+        For testing: <code>python sample_data.py</code></p>
+      </div>`;
+    document.getElementById('dataStatus').textContent = 'No data';
+  }
+  setLoading(false);
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────
+function getFilters() {
+  const a = parseInt(document.getElementById('gradeMin').value);
+  const b = parseInt(document.getElementById('gradeMax').value);
+  return {
+    gradeMinIdx: Math.min(a,b), gradeMaxIdx: Math.max(a,b),
+    minRoutes:   parseInt(document.getElementById('minRoutes').value),
+    maxBusy:     parseInt(document.getElementById('maxBusy').value) / 10,
+    minStars:    parseFloat(document.getElementById('minStars').value),
+    minSun:      parseInt(document.getElementById('minSun').value),
+    maxSun:      parseInt(document.getElementById('maxSun').value),
+    boltSafe:    document.getElementById('boltSafe').checked,
+    boltUnknown: document.getElementById('boltUnknown').checked,
+    boltUnsafe:  document.getElementById('boltUnsafe').checked,
+    sortBy:      document.getElementById('sortBy').value,
+  };
+}
+
+function routesInRange(crag, minIdx, maxIdx) {
+  return (crag.routes||[]).filter(r => {
+    const idx = r.grade_sort ?? GRADE_IDX[r.grade] ?? 99;
+    return idx >= minIdx && idx <= maxIdx;
+  });
+}
+
+function applyFilters(ov={}) {
+  const f = {...getFilters(), ...ov};
+  filteredCrags = allCrags.filter(crag => {
+    if (routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).length < f.minRoutes) return false;
+    const busy = crag.normalised_busyness ?? crag.busyness_score ?? 0;
+    if (busy > f.maxBusy) return false;
+    if (crag.avg_star_rating < f.minStars) return false;
+
+    // Sun filter (only applies if crag has aspect data)
+    const sched = getSunSchedule(crag);
+    if (sched !== null) {
+      const sh = sched.totalSunHours;
+      if (sh < f.minSun) return false;
+      if (sh > f.maxSun) return false;
+    }
+
+    const anyBolt = (crag.routes||[]).some(r =>
+      (r.bolt_status==='safe'&&f.boltSafe) ||
+      (r.bolt_status==='unknown'&&f.boltUnknown) ||
+      (r.bolt_status==='unsafe'&&f.boltUnsafe)
+    );
+    if ((crag.routes||[]).length > 0 && !anyBolt) return false;
+    return true;
+  });
+
+  filteredCrags.sort((a,b) => {
+    const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
+    const sunB = getSunSchedule(b)?.totalSunHours ?? 0;
+    switch(f.sortBy) {
+      case 'norm_busy_asc':  return (a.normalised_busyness??1) - (b.normalised_busyness??1);
+      case 'norm_busy_desc': return (b.normalised_busyness??0) - (a.normalised_busyness??0);
+      case 'busyness_asc':   return (a.busyness_score??1) - (b.busyness_score??1);
+      case 'stars_desc':     return b.avg_star_rating - a.avg_star_rating;
+      case 'sun_desc':       return sunB - sunA;
+      case 'sun_asc':        return sunA - sunB;
+      case 'routes_desc':    return b.route_count - a.route_count;
+      case 'grade_asc':      return (GRADE_IDX[a.grade_min]??99) - (GRADE_IDX[b.grade_min]??99);
+      case 'name_asc':       return a.name.localeCompare(b.name);
+      default: return 0;
+    }
+  });
+
+  renderCrags(filteredCrags, f);
+}
+
+function resetFilters() {
+  document.getElementById('gradeMin').value = 0;
+  document.getElementById('gradeMax').value = 24;
+  document.getElementById('minRoutes').value = 1;
+  document.getElementById('maxBusy').value = 10;
+  document.getElementById('minStars').value = 0;
+  document.getElementById('minSun').value = 0;
+  document.getElementById('maxSun').value = 12;
+  document.getElementById('boltSafe').checked = true;
+  document.getElementById('boltUnknown').checked = true;
+  document.getElementById('boltUnsafe').checked = false;
+  document.getElementById('sortBy').value = 'norm_busy_asc';
+  updateSliderLabels();
+  document.getElementById('aiResponse').className = 'ai-response';
+  applyFilters();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderCrags(crags, filters) {
+  const list = document.getElementById('cragList');
+  document.getElementById('resultsCount').innerHTML = `<strong>${crags.length}</strong> of ${allCrags.length} crags`;
+  renderOverview(crags, filters.gradeMinIdx, filters.gradeMaxIdx);
+  if (!crags.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No crags match these filters.</p></div>`;
+    return;
+  }
+  list.innerHTML = crags.map(c => cragCard(c, filters)).join('');
+}
+
+function cragCard(crag, f) {
+  const routes = crag.routes || [];
+  const inRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx);
+  const sched   = getSunSchedule(crag);
+
+  // Busyness badge uses normalised busyness
+  const b = crag.normalised_busyness ?? crag.busyness_score ?? 0;
+  const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
+  const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
+  const _cragStars = Math.min(5, Math.max(0, Math.round(crag.avg_star_rating || 0)));
+  const starsStr = '★'.repeat(_cragStars)+'☆'.repeat(5-_cragStars);
+  const gradeRange = crag.grade_min && crag.grade_max
+    ? (crag.grade_min===crag.grade_max?crag.grade_min:`${crag.grade_min}–${crag.grade_max}`) : '?';
+
+  // Grade histogram bar
+  const hist = crag.grades_histogram||{};
+  const total = Object.values(hist).reduce((s,v)=>s+v,0);
+  const barSegs = GRADES.map((g,i)=>{
+    const cnt=hist[g]||0; if(!cnt) return '';
+    const pct=(cnt/total*100).toFixed(1);
+    const fade=(i<f.gradeMinIdx||i>f.gradeMaxIdx)?'opacity:0.28;':'';
+    return `<div class="grade-seg" style="width:${pct}%;background:${gradeColor(i)};${fade}" data-tip="${g}: ${cnt}"></div>`;
+  }).join('');
+
+  // Sun timeline
+  const sunHtml = renderSunTimeline(sched, crag);
+
+  // Log sparkline — filtered to grade range
+  const sparkHtml = renderSparkline(crag.routes || [], f.gradeMinIdx, f.gradeMaxIdx);
+
+  // Busyness stats — show both normalised and raw
+  const normBusy = crag.normalised_busyness != null ? `${(crag.normalised_busyness*100).toFixed(0)}%` : '?';
+  const ageStr   = crag.crag_age_years ? `${crag.crag_age_years}yr old` : '';
+
+  const isExp = expandedCrags.has(crag.id);
+  const filteredRoutes = routes
+    .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown)||(r.bolt_status==='unsafe'&&f.boltUnsafe))
+    .sort((a,b)=>(a.grade_sort??99)-(b.grade_sort??99));
+
+  // Group by sector, preserving order of first appearance
+  const sectorOrder = [];
+  const bySector = {};
+  for (const r of filteredRoutes) {
+    const s = r.sector || '';
+    if (!bySector[s]) { bySector[s] = []; sectorOrder.push(s); }
+    bySector[s].push(r);
+  }
+
+  const makeRow = r => {
+    const inR=(r.grade_sort??99)>=f.gradeMinIdx&&(r.grade_sort??99)<=f.gradeMaxIdx;
+    const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
+    const stars='★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const vlBadge = r.vl_url
+      ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
+      : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
+    return `<tr style="${inR?'':'opacity:0.38'}">
+      <td>
+        ${r.name}
+        <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
+        ${vlBadge}
+      </td>
+      <td><span class="route-grade">${r.grade}</span></td>
+      <td><span class="stars-text">${stars}</span></td>
+      <td><span class="bolt-dot bolt-${r.bolt_status}"></span>${r.bolt_status}</td>
+      <td>${r.log_count}</td>
+    </tr>`;
+  };
+
+  const rows = sectorOrder.map(s => {
+    const sectorRows = bySector[s].map(makeRow).join('');
+    const header = s ? `<tr class="sector-header-row"><td colspan="5">${s}</td></tr>` : '';
+    return header + sectorRows;
+  }).join('');
+
+  const aspectBadge = crag.aspect_raw
+    ? `<span class="badge badge-aspect">faces ${crag.aspect_raw}</span>`
+    : '';
+
+  return `<div class="crag-card" id="crag-${crag.id}">
+    <div class="crag-header">
+      <div>
+        <div class="crag-name"><a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a></div>
+        <div class="crag-badges">
+          <span class="badge badge-grade">${gradeRange}</span>
+          <span class="badge ${busyCls}">${busyLbl}</span>
+          <span class="badge badge-stars">${starsStr} ${crag.avg_star_rating.toFixed(1)}</span>
+          ${aspectBadge}
+          ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
+        </div>
+      </div>
+    </div>
+
+    <div class="crag-stats">
+      <div class="stat">
+        <span class="stat-val">${crag.route_count}</span>
+        <span class="stat-label">Routes</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">${crag.recent_log_count}</span>
+        <span class="stat-label">Logs (12mo)</span>
+      </div>
+      <div class="stat" title="Logs/year normalised by crag age">
+        <span class="stat-val">${normBusy}</span>
+        <span class="stat-label">Busyness</span>
+        <span class="stat-sub">${ageStr}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val">${crag.safe_route_count??'?'}</span>
+        <span class="stat-label">Safe bolts</span>
+      </div>
+      ${sched ? `<div class="stat">
+        <span class="stat-val">${sched.totalSunHours}h</span>
+        <span class="stat-label">Sun hrs</span>
+        ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
+      </div>` : ''}
+    </div>
+
+    <div class="grade-bar">${barSegs}</div>
+    ${sunHtml}
+    ${sparkHtml}
+
+    <div class="routes-preview">
+      <button class="routes-toggle" onclick="toggleRoutes('${crag.id}')">
+        ${isExp ? '▲ Hide routes' : `▼ Show ${routes.length} routes`}
+      </button>
+      ${isExp ? renderCragHists(crag, f.gradeMinIdx, f.gradeMaxIdx) : ''}
+      ${isExp ? `<table class="routes-table" style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+        <thead><tr><th>Route</th><th>Grade</th><th>Stars</th><th>Bolts</th><th>Logs</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderSunTimeline(sched, crag) {
+  if (!sched) {
+    return `<div class="sun-row">
+      <span class="sun-label">☀ Sun</span>
+      <span class="sun-info none">No aspect data</span>
+    </div>`;
+  }
+
+  const segs = sched.sunHours.map(([h, az, alt, isSunny]) => {
+    const cls = alt <= 0 ? 'norise' : isSunny ? 'sunny' : 'shade';
+    const dir = azToCompass(az);
+    const tip = `${h}:00 — sun at ${az}° (${dir}), ${alt}° high — ${isSunny?'☀ SUN':'◑ shade'}`;
+    return `<div class="sun-seg ${cls}" data-tip="${tip}"></div>`;
+  }).join('');
+
+  const info = sched.sunnyFrom
+    ? `${sched.sunnyFrom}–${sched.sunnyUntil}`
+    : 'No direct sun';
+  const infoCls = sched.totalSunHours > 6 ? 'good' : sched.totalSunHours === 0 ? 'none' : '';
+
+  // Hour labels
+  const labels = sched.sunHours.map(([h])=>h);
+  const labelHtml = `<div style="display:flex;gap:1px;flex:1;margin-top:2px">
+    ${labels.map((h,i)=>`<div style="flex:1;font-size:0.58rem;color:#aaa;text-align:center">${h%3===0?h:''}</div>`).join('')}
+  </div>`;
+
+  return `<div class="sun-row">
+    <span class="sun-label">☀ Sun</span>
+    <div style="flex:1">
+      <div class="sun-timeline">${segs}</div>
+      ${labelHtml}
+    </div>
+    <span class="sun-info ${infoCls}">${info}</span>
+  </div>`;
+}
+
+// ── Histogram helpers (grade-filtered) ───────────────────────────────────
+
+// Collect all log dates from routes whose grade_sort falls within [minIdx, maxIdx].
+// Falls back to all logs if no grade field is present (old data.json without grade tags).
+function filteredLogDates(routes, minIdx, maxIdx) {
+  const dates = [];
+  for (const r of routes) {
+    const gs = r.grade_sort ?? 999;
+    const inRange = gs >= minIdx && gs <= maxIdx;
+    for (const log of (r.logs || [])) {
+      // If log has a grade tag, use it; otherwise fall back to the route's grade_sort
+      const logGs = log.grade != null ? (GRADE_IDX[log.grade] ?? 999) : gs;
+      if (logGs >= minIdx && logGs <= maxIdx) {
+        dates.push(log.date);
+      } else if (log.grade == null && inRange) {
+        // Old log without grade tag — inherit from parent route
+        dates.push(log.date);
+      }
+    }
+  }
+  return dates.filter(Boolean);
+}
+
+function buildLogHistogram(dates) {
+  const h = {};
+  for (const d of dates) {
+    if (d) { const y = d.slice(0,4); h[y] = (h[y]||0) + 1; }
+  }
+  return h;
+}
+
+function buildDowHistogram(dates) {
+  const dts = dates.map(d => { try { return new Date(d); } catch { return null; } }).filter(Boolean);
+  if (!dts.length) return Array(7).fill(0);
+  const earliest = new Date(dts.reduce((a,b) => a < b ? a : b));
+  const latest   = new Date(dts.reduce((a,b) => a > b ? a : b));
+  const occ = Array(7).fill(0);
+  for (let d = new Date(earliest); d <= latest; d.setDate(d.getDate()+1))
+    occ[(d.getDay()+6)%7]++;
+  const raw = Array(7).fill(0);
+  for (const dt of dts) raw[(dt.getDay()+6)%7]++;
+  return occ.map((o,i) => o ? Math.round(raw[i]/o*10000)/10000 : 0);
+}
+
+function buildWeekHistogram(dates) {
+  const dts = dates.map(d => { try { return new Date(d); } catch { return null; } }).filter(Boolean);
+  if (!dts.length) return Array(53).fill(0);
+  const earliest = new Date(dts.reduce((a,b) => a < b ? a : b));
+  const latest   = new Date(dts.reduce((a,b) => a > b ? a : b));
+  const spanYears = Math.max(1, (latest - earliest) / (365.25*86400*1000));
+  const raw = Array(53).fill(0);
+  for (const dt of dts) { const w = getISOWeek(dt)-1; if (w>=0&&w<53) raw[w]++; }
+  return raw.map(v => Math.round(v/spanYears*10000)/10000);
+}
+
+function renderSparkline(routes, minIdx, maxIdx) {
+  // Build histogram from raw logs filtered by grade, falling back to
+  // pre-baked log_histogram if routes array has no logs with dates
+  let hist;
+  const allRoutes = Array.isArray(routes) ? routes : [];
+  if (allRoutes.length) {
+    const dates = filteredLogDates(allRoutes, minIdx ?? 0, maxIdx ?? 24);
+    hist = buildLogHistogram(dates);
+  } else {
+    hist = routes; // legacy: called with pre-baked histogram object
+  }
+  if (!hist || Object.keys(hist).length < 2) return '';
+  const years = Object.keys(hist).sort();
+  const vals  = years.map(y => hist[y]);
+  const maxV  = Math.max(...vals, 1);
+  const currentYear = currentDate.year.toString();
+
+  const bars = years.map((y,i) => {
+    const h = Math.max(3, Math.round((vals[i]/maxV)*100));
+    const isRecent = parseInt(y) >= parseInt(currentYear) - 2;
+    return `<div class="spark-bar${isRecent?' recent':''}"
+      style="height:${h}%" data-tip="${y}: ${vals[i]} logs"></div>`;
+  }).join('');
+
+  return `<div style="margin-top:6px">
+    <div style="font-size:0.68rem;color:var(--mid);margin-bottom:3px">Log activity by year</div>
+    <div class="sparkline-row">${bars}</div>
+  </div>`;
+}
+
+function azToCompass(az) {
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(az/22.5)%16];
+}
+
+function toggleRoutes(id) {
+  expandedCrags.has(id) ? expandedCrags.delete(id) : expandedCrags.add(id);
+  applyFilters();
+  setTimeout(()=>document.getElementById(`crag-${id}`)?.scrollIntoView({block:'nearest'}),50);
+}
+
+// ── Slider labels ──────────────────────────────────────────────────────────
+function updateSliderLabels() {
+  const a=parseInt(document.getElementById('gradeMin').value);
+  const b=parseInt(document.getElementById('gradeMax').value);
+  document.getElementById('gradeMinLabel').textContent = GRADES[Math.min(a,b)];
+  document.getElementById('gradeMaxLabel').textContent = GRADES[Math.max(a,b)];
+  document.getElementById('minRoutesLabel').textContent = document.getElementById('minRoutes').value;
+  const bv=parseInt(document.getElementById('maxBusy').value);
+  document.getElementById('maxBusyLabel').textContent = bv===10?'Any':(bv*10)+'%';
+  const sv=parseFloat(document.getElementById('minStars').value);
+  document.getElementById('minStarsLabel').textContent = sv===0?'Any':sv.toFixed(1)+'★';
+  const minS=parseInt(document.getElementById('minSun').value);
+  const maxS=parseInt(document.getElementById('maxSun').value);
+  document.getElementById('minSunLabel').textContent = minS===0?'Any':minS+'h';
+  document.getElementById('maxSunLabel').textContent = maxS===12?'Any':maxS+'h';
+  // Grade track — offset by 7px (half thumb width) so fill aligns with thumb centres
+  const mn=Math.min(a,b)/24*100, mx=Math.max(a,b)/24*100;
+  const t=document.getElementById('gradeTrack');
+  const wrap = t.parentElement;
+  const usable = wrap.offsetWidth - 14; // total travel width (full width minus one thumb)
+  t.style.left  = (7 + mn/100 * usable) + 'px';
+  t.style.width = ((mx - mn)/100 * usable) + 'px';
+  // Z-index: raise whichever thumb is closer to the left edge so it stays clickable
+  const minEl=document.getElementById('gradeMin');
+  const maxEl=document.getElementById('gradeMax');
+  if (a >= b) {
+    // thumbs overlapping or crossed — raise min so it stays grabbable
+    minEl.classList.add('thumb-top'); maxEl.classList.remove('thumb-top');
+  } else {
+    minEl.classList.remove('thumb-top'); maxEl.classList.remove('thumb-top');
+  }
+}
+['gradeMin','gradeMax'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('mousedown', () => {
+    document.getElementById('gradeMin').classList.remove('thumb-top');
+    document.getElementById('gradeMax').classList.remove('thumb-top');
+    el.classList.add('thumb-top');
+  });
+  el.addEventListener('touchstart', () => {
+    document.getElementById('gradeMin').classList.remove('thumb-top');
+    document.getElementById('gradeMax').classList.remove('thumb-top');
+    el.classList.add('thumb-top');
+  }, {passive: true});
+});
+['gradeMin','gradeMax','minRoutes','maxBusy','minStars','minSun','maxSun'].forEach(id=>
+  document.getElementById(id).addEventListener('input', updateSliderLabels));
+
+// ── AI query ──────────────────────────────────────────────────────────────
+async function runAiQuery() {
+  const q=document.getElementById('aiQuery').value.trim();
+  const key=document.getElementById('apiKey').value.trim();
+  const respEl=document.getElementById('aiResponse');
+  const btn=document.getElementById('aiBtn');
+  if(!q) return;
+  if(!key){respEl.textContent='Enter your Anthropic API key above.';respEl.className='ai-response visible error';return;}
+  btn.disabled=true; btn.textContent='…';
+  respEl.className='ai-response visible'; respEl.textContent='Thinking…';
+
+  const summaries = allCrags.map(c => {
+    const s = getSunSchedule(c);
+    return {
+      name: c.name, route_count: c.route_count,
+      grade_min: c.grade_min, grade_max: c.grade_max,
+      grades_histogram: c.grades_histogram,
+      avg_star_rating: c.avg_star_rating,
+      normalised_busyness: c.normalised_busyness,
+      busyness_score: c.busyness_score,
+      recent_log_count: c.recent_log_count,
+      crag_age_years: c.crag_age_years,
+      safe_route_count: c.safe_route_count,
+      aspect_raw: c.aspect_raw,
+      sun_hours: s?.totalSunHours ?? null,
+      sunny_from: s?.sunnyFrom ?? null,
+      sunny_until: s?.sunnyUntil ?? null,
+    };
+  });
+
+  const dateStr = `${currentDate.year}-${String(currentDate.month).padStart(2,'0')}-${String(currentDate.day).padStart(2,'0')}`;
+  const system = `You are a Kalymnos climbing assistant. You have data on ${allCrags.length} crags for trip date ${dateStr}.
+French sport grades (index 0–24): ${GRADES.join(', ')}.
+Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, logs/yr relative to crag age — use this for busyness), busyness_score (raw), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (total sun hours on the trip date), sunny_from/sunny_until (local times).
+Interpret natural language queries. Return ONLY a JSON object with:
+  "explanation": 1–2 sentence summary
+  "crag_names": ordered array (best first, max 20)
+  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, maxBusy (0–10 int), minSun, maxSun (0–12 int), sortBy }
+No markdown, no preamble. Raw JSON only.`;
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000, system,
+        messages:[{role:'user',content:`Data:\n${JSON.stringify(summaries)}\n\nQuery: "${q}"`}]
+      })
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${r.status}`);}
+    const data=await r.json();
+    const raw=data.content?.map(b=>b.text||'').join('')||'';
+    let parsed;
+    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}
+    catch{respEl.className='ai-response visible';respEl.textContent=raw;return;}
+
+    respEl.className='ai-response visible';
+    respEl.innerHTML=`<strong>AI:</strong> ${parsed.explanation||''}`;
+
+    if(parsed.filter_config){
+      const fc=parsed.filter_config;
+      if(fc.gradeMinIdx!==undefined) document.getElementById('gradeMin').value=fc.gradeMinIdx;
+      if(fc.gradeMaxIdx!==undefined) document.getElementById('gradeMax').value=fc.gradeMaxIdx;
+      if(fc.minRoutes!==undefined)   document.getElementById('minRoutes').value=fc.minRoutes;
+      if(fc.maxBusy!==undefined)     document.getElementById('maxBusy').value=fc.maxBusy;
+      if(fc.minSun!==undefined)      document.getElementById('minSun').value=fc.minSun;
+      if(fc.maxSun!==undefined)      document.getElementById('maxSun').value=fc.maxSun;
+      if(fc.sortBy!==undefined)      document.getElementById('sortBy').value=fc.sortBy;
+      updateSliderLabels();
+    }
+
+    if(parsed.crag_names?.length){
+      const order=new Map(parsed.crag_names.map((n,i)=>[n.toLowerCase(),i]));
+      const matched=allCrags
+        .filter(c=>order.has(c.name.toLowerCase()))
+        .sort((a,b)=>order.get(a.name.toLowerCase())-order.get(b.name.toLowerCase()));
+      filteredCrags=matched;
+      const filters=getFilters();
+      document.getElementById('resultsCount').innerHTML=`<strong>${matched.length}</strong> crags from AI`;
+      document.getElementById('cragList').innerHTML=matched.map(c=>cragCard(c,filters)).join('');
+      matched.forEach(c=>document.getElementById(`crag-${c.id}`)?.classList.add('ai-highlight'));
+    }
+  } catch(e){
+    respEl.className='ai-response visible error'; respEl.textContent=`Error: ${e.message}`;
+  } finally { btn.disabled=false; btn.textContent='Ask →'; }
+}
+
+// ── Bar chart renderer ────────────────────────────────────────────────────
+// values: array of numbers (already normalised/averaged)
+// opts: { labels, labelEvery, colorFn, highlightFn, chartClass, truncateAxis, pctTooltip }
+//   truncateAxis: if true, scales bars from min→max rather than 0→max,
+//                 making variation between similar values visible
+//   pctTooltip:  if true, tooltip shows "±N% vs avg" instead of raw value
+function renderBarChart(containerId, labelContainerId, values, opts = {}) {
+  const {
+    labels = [],
+    labelEvery = 1,
+    colorFn = null,         // (idx, relVal) => css colour
+    highlightFn = null,     // (idx) => bool — makes bar slightly darker
+    chartClass = '',
+    truncateAxis = false,   // scale from min→max to amplify small differences
+    pctTooltip = false,     // show "±N% vs avg" instead of raw value
+  } = opts;
+
+  const container = document.getElementById(containerId);
+  const labelContainer = labelContainerId ? document.getElementById(labelContainerId) : null;
+  if (!container) return;
+
+  const nonZero = values.filter(v => v > 0);
+  const max  = Math.max(...values, 0.0001);
+  const min  = truncateAxis && nonZero.length > 1 ? Math.min(...nonZero) : 0;
+  const range = max - min || 0.0001;
+  const avg  = nonZero.length ? nonZero.reduce((s, v) => s + v, 0) / nonZero.length : 1;
+
+  container.className = 'bar-chart' + (chartClass ? ' ' + chartClass : '');
+
+  container.innerHTML = values.map((v, i) => {
+    const rel  = (v - min) / range;             // 0–1 relative to visible range
+    const pct  = Math.max(4, Math.round(rel * 100));
+    const col  = colorFn ? colorFn(i, rel) : busyColor(rel);
+    let tip;
+    if (pctTooltip && avg > 0) {
+      const delta = Math.round((v - avg) / avg * 100);
+      const sign  = delta >= 0 ? '+' : '';
+      tip = labels[i] ? `${labels[i]}: ${sign}${delta}% vs avg` : `${sign}${delta}%`;
+    } else {
+      tip = labels[i] ? `${labels[i]}: ${v.toFixed(3)}` : v.toFixed(3);
+    }
+    const dim  = highlightFn && !highlightFn(i) ? 'opacity:0.45;' : '';
+    return `<div class="bc-bar" style="height:${pct}%;background:${col};${dim}" data-tip="${tip}"></div>`;
+  }).join('');
+
+  if (labelContainer) {
+    labelContainer.innerHTML = values.map((v, i) => {
+      const lbl = labels[i] || '';
+      const show = i % labelEvery === 0;
+      return `<div class="bc-label${show ? ' mark' : ''}">${show ? lbl : ''}</div>`;
+    }).join('');
+  }
+}
+
+function busyColor(rel) {
+  // green → yellow → red
+  if (rel < 0.4) return `hsl(${120 - rel*100},60%,48%)`;
+  if (rel < 0.7) return `hsl(${80 - (rel-0.4)*200},65%,48%)`;
+  return `hsl(${20 - (rel-0.7)*60},72%,45%)`;
+}
+
+// ── Aggregate computation ─────────────────────────────────────────────────
+function computeAggregates(crags, minIdx, maxIdx) {
+  const mi = minIdx ?? 0, mx = maxIdx ?? 24;
+
+  // Try to compute from raw logs (grade-filtered). Fall back to pre-baked
+  // arrays if no routes have raw logs (old data.json).
+  const hasRawLogs = crags.some(c => (c.routes||[]).some(r => (r.logs||[]).length > 0));
+
+  if (hasRawLogs) {
+    const allDates = crags.flatMap(c => filteredLogDates(c.routes || [], mi, mx));
+    if (!allDates.length) return null;
+    return { dow: buildDowHistogram(allDates), week: buildWeekHistogram(allDates) };
+  }
+
+  // Legacy fallback: weight pre-baked histograms by total_log_count
+  const valid = crags.filter(c => c.dow_histogram && c.week_histogram && c.total_log_count > 0);
+  if (!valid.length) return null;
+  const totalWeight = valid.reduce((s, c) => s + c.total_log_count, 0);
+  const dowAgg  = Array(7).fill(0);
+  const weekAgg = Array(53).fill(0);
+  for (const c of valid) {
+    const w = c.total_log_count / totalWeight;
+    c.dow_histogram.forEach((v, i)  => { dowAgg[i]  += v * w; });
+    c.week_histogram.forEach((v, i) => { weekAgg[i] += v * w; });
+  }
+  return { dow: dowAgg, week: weekAgg };
+}
+
+function renderOverview(crags, minIdx, maxIdx) {
+  const agg = computeAggregates(crags, minIdx, maxIdx);
+  const panel = document.getElementById('overviewPanel');
+  if (!agg) { panel.classList.remove('visible'); return; }
+  panel.classList.add('visible');
+
+  const DOW_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const WEEK_LABELS = Array.from({length:53}, (_,i) => `W${i+1}`);
+
+  // Find current trip week for highlight
+  const tripDate = new Date(currentDate.year, currentDate.month - 1, currentDate.day);
+  const tripWeek = getISOWeek(tripDate) - 1; // 0-indexed
+  const tripDow  = (tripDate.getDay() + 6) % 7; // 0=Mon
+
+  renderBarChart('aggDowChart', 'aggDowLabels', agg.dow, {
+    labels: DOW_LABELS,
+    labelEvery: 1,
+    highlightFn: i => i === tripDow,
+    truncateAxis: true,
+    pctTooltip: true,
+  });
+
+  renderBarChart('aggWeekChart', 'aggWeekLabels', agg.week, {
+    labels: WEEK_LABELS,
+    labelEvery: 4,
+    chartClass: 'week-chart',
+    highlightFn: i => i === tripWeek,
+    colorFn: (i, rel) => {
+      // Season tint: weeks 38-48 (Oct-Nov) = warm orange; others use busy scale
+      const isKalymnos = (i >= 38 && i <= 47);
+      if (isKalymnos) return `hsl(${30 + (1-rel)*20},70%,${45+rel*5}%)`;
+      return busyColor(rel);
+    },
+  });
+}
+
+function getISOWeek(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function toggleOverview() {
+  const btn    = document.getElementById('overviewToggle');
+  const charts = document.getElementById('overviewCharts');
+  btn.classList.toggle('open');
+  charts.classList.toggle('open');
+}
+
+// ── Per-crag DOW + week histograms ─────────────────────────────────────────
+function renderCragHists(crag, minIdx, maxIdx) {
+  const mi = minIdx ?? 0, mx = maxIdx ?? 24;
+  const routes = crag.routes || [];
+
+  const DOW_LABELS  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const WEEK_LABELS = Array.from({length:53}, (_,i) => `W${i+1}`);
+
+  const dowId  = `dow-${crag.id}`;
+  const dowLId = `dowL-${crag.id}`;
+  const wkId   = `wk-${crag.id}`;
+  const wkLId  = `wkL-${crag.id}`;
+
+  // Rendered after DOM insertion via setTimeout
+  setTimeout(() => {
+    const hasRawLogs = routes.some(r => (r.logs||[]).length > 0);
+    let dow, week;
+    if (hasRawLogs) {
+      const dates = filteredLogDates(routes, mi, mx);
+      dow  = buildDowHistogram(dates);
+      week = buildWeekHistogram(dates);
+    } else {
+      // Legacy fallback to pre-baked arrays
+      dow  = crag.dow_histogram;
+      week = crag.week_histogram;
+    }
+    if (dow)  renderBarChart(dowId,  dowLId,  dow,  { labels: DOW_LABELS,  labelEvery: 1, truncateAxis: true, pctTooltip: true });
+    if (week) renderBarChart(wkId,   wkLId,   week, { labels: WEEK_LABELS, labelEvery: 4, chartClass: 'week-chart' });
+  }, 0);
+
+  const dowHtml = `
+    <div>
+      <div class="chart-section-label">Logs by day of week</div>
+      <div class="bar-chart" id="${dowId}"></div>
+      <div class="bar-chart-labels" id="${dowLId}"></div>
+    </div>`;
+
+  const wkHtml = `
+    <div>
+      <div class="chart-section-label">Logs by week of year</div>
+      <div class="bar-chart week-chart" id="${wkId}"></div>
+      <div class="bar-chart-labels" id="${wkLId}"></div>
+    </div>`;
+
+  return `<div class="crag-hists">${dowHtml}${wkHtml}</div>`;
+}
+
+function setLoading(on){
+  document.getElementById('loadingBar').className=on?'loading-bar active':'loading-bar';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+updateSliderLabels();
+initDatePicker();
+loadData();
+</script>
+</body>
+</html>
