@@ -420,7 +420,7 @@
       </div>
     </div>
 
-    <h2>Bolt Safety</h2>
+    <h2>Route Safety</h2>
     <div class="check-group">
       <label class="check-label"><input type="checkbox" id="boltSafe" checked><span class="bolt-dot bolt-safe"></span> Safe / rebolted</label>
       <label class="check-label"><input type="checkbox" id="boltUnknown" checked><span class="bolt-dot bolt-unknown"></span> Unknown</label>
@@ -736,7 +736,7 @@ function applyFilters(ov={}) {
     if (f.search) {
       const q = f.search;
       const nameMatch = crag.name.toLowerCase().includes(q);
-      const sectorMatch = (crag.sectors||[]).some(s => s.toLowerCase().includes(q));
+      const sectorMatch = (crag.routes||[]).some(r => r.sector && r.sector.toLowerCase().includes(q));
       const routeMatch = (crag.routes||[]).some(r => r.name.toLowerCase().includes(q));
       if (!nameMatch && !sectorMatch && !routeMatch) return false;
     }
@@ -780,6 +780,12 @@ function applyFilters(ov={}) {
 
 function applyFiltersSectors(f) {
   filteredSectors = allSectors.filter(s => {
+    if (f.search) {
+      const q = f.search;
+      const nameMatch = s.cragName.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
+      const routeMatch = (s.routes||[]).some(r => r.name.toLowerCase().includes(q));
+      if (!nameMatch && !routeMatch) return false;
+    }
     const visibleInRange = routesInRange(s, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
       (r.bolt_status==='unknown'&&f.boltUnknown)
@@ -939,7 +945,7 @@ function sectorCard(sector, f) {
       <div class="stat" title="Recent logs per route in selected grade range, normalised">
         <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
       </div>
-      <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe bolts</span></div>
+      <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe Routes</span></div>
       ${sched ? `<div class="stat">
         <span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span>
         ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
@@ -1080,7 +1086,7 @@ function cragCard(crag, f) {
       </div>
       <div class="stat">
         <span class="stat-val">${crag.safe_route_count??'?'}</span>
-        <span class="stat-label">Safe bolts</span>
+        <span class="stat-label">Safe Routes</span>
       </div>
       ${sched ? `<div class="stat">
         <span class="stat-val">${sched.totalSunHours}h</span>
