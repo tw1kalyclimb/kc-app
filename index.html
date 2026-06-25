@@ -361,6 +361,11 @@
 
 <div class="app">
   <aside class="sidebar">
+    <div class="filter-group" style="margin-bottom:10px">
+      <input type="search" id="searchQuery" placeholder="Search crags, sectors, routes…"
+        oninput="applyFilters()"
+        style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;background:var(--surface);color:var(--text)">
+    </div>
     <div class="mode-toggle">
       <button id="modeCrags" class="mode-btn active" onclick="setMode('crags')">Crags</button>
       <button id="modeSectors" class="mode-btn" onclick="setMode('sectors')">Sectors</button>
@@ -371,10 +376,10 @@
       <div class="filter-label" style="margin-bottom:5px">Grade Authority</div>
       <div class="grade-source-toggle">
         <label class="gs-opt">
-          <input type="radio" name="primaryGrade" value="ukc" checked onchange="setPrimaryGrade('ukc')"> UKC
+          <input type="radio" name="primaryGrade" value="ukc" onchange="setPrimaryGrade('ukc')"> UKC
         </label>
         <label class="gs-opt">
-          <input type="radio" name="primaryGrade" value="vl" onchange="setPrimaryGrade('vl')"> VL
+          <input type="radio" name="primaryGrade" value="vl" checked onchange="setPrimaryGrade('vl')"> VL
         </label>
       </div>
     </div>
@@ -557,7 +562,7 @@ function computeSunSchedule(aspectDeg, year, month, day) {
 let allCrags = [], filteredCrags = [], expandedCrags = new Set();
 let allSectors = [], filteredSectors = [];
 let currentMode = 'crags';
-let primaryGrade = 'ukc';
+let primaryGrade = 'vl';
 let currentDate = { year: 2024, month: 10, day: 15 }; // default Oct 15
 let sunScheduleCache = {}; // crag.id -> computed schedule for currentDate
 let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
@@ -641,6 +646,7 @@ function getFilters() {
     boltSafe:    document.getElementById('boltSafe').checked,
     boltUnknown: document.getElementById('boltUnknown').checked,
     sortBy:      document.getElementById('sortBy').value,
+    search:      document.getElementById('searchQuery').value.trim().toLowerCase(),
   };
 }
 
@@ -727,6 +733,13 @@ function applyFilters(ov={}) {
   if (currentMode === 'sectors') { applyFiltersSectors(f); return; }
 
   filteredCrags = allCrags.filter(crag => {
+    if (f.search) {
+      const q = f.search;
+      const nameMatch = crag.name.toLowerCase().includes(q);
+      const sectorMatch = (crag.sectors||[]).some(s => s.toLowerCase().includes(q));
+      const routeMatch = (crag.routes||[]).some(r => r.name.toLowerCase().includes(q));
+      if (!nameMatch && !sectorMatch && !routeMatch) return false;
+    }
     const visibleInRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
       (r.bolt_status==='unknown'&&f.boltUnknown)
@@ -876,19 +889,22 @@ function sectorCard(sector, f) {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
     const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
     const stars = '★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const ukcBadge = r.ukc_url
+      ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
+      : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
     const vlBadge = r.vl_url
       ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
       : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
     const primaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
     const secondaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.grade : r.vl_grade;
     const secondaryLabel = primaryGrade === 'vl' ? 'UKC grade' : 'VL grade';
-    const gradeHtml = secondaryG
+    const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
       : `<span class="route-grade">${primaryG}</span>`;
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
         ${r.name}
-        <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
+        ${ukcBadge}
         ${vlBadge}
       </td>
       <td>${gradeHtml}</td>
@@ -900,11 +916,14 @@ function sectorCard(sector, f) {
 
   const aspectBadge = sector.aspect_raw
     ? `<span class="badge badge-aspect">faces ${sector.aspect_raw}</span>` : '';
+  const sectorNameHtml = sector.ukc_url
+    ? `<a href="${sector.ukc_url}" target="_blank" rel="noopener">${sector.displayName}</a>`
+    : sector.displayName;
 
   return `<div class="crag-card" id="crag-${cardKey}">
     <div class="crag-header">
       <div>
-        <div class="crag-name"><a href="${sector.ukc_url}" target="_blank" rel="noopener">${sector.displayName}</a></div>
+        <div class="crag-name">${sectorNameHtml}</div>
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
@@ -994,19 +1013,22 @@ function cragCard(crag, f) {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
     const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
     const stars='★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const ukcBadge = r.ukc_url
+      ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
+      : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
     const vlBadge = r.vl_url
       ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
       : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
     const primaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
     const secondaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.grade : r.vl_grade;
     const secondaryLabel = primaryGrade === 'vl' ? 'UKC grade' : 'VL grade';
-    const gradeHtml = secondaryG
+    const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
       : `<span class="route-grade">${primaryG}</span>`;
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
         ${r.name}
-        <a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>
+        ${ukcBadge}
         ${vlBadge}
       </td>
       <td>${gradeHtml}</td>
@@ -1025,11 +1047,14 @@ function cragCard(crag, f) {
   const aspectBadge = crag.aspect_raw
     ? `<span class="badge badge-aspect">faces ${crag.aspect_raw}</span>`
     : '';
+  const cragNameHtml = crag.ukc_url
+    ? `<a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a>`
+    : crag.name;
 
   return `<div class="crag-card" id="crag-${cragKey}">
     <div class="crag-header">
       <div>
-        <div class="crag-name"><a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a></div>
+        <div class="crag-name">${cragNameHtml}</div>
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
