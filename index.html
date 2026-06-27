@@ -84,12 +84,12 @@
     .grade-inline-label { display: flex; }
     .grade-range-wrap input[type=range] {
       position: static; pointer-events: auto; background: var(--border);
-      height: 6px; width: 100%;
+      height: 4px; width: 100%;
     }
     .grade-range-wrap input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
     .grade-range-wrap input[type=range].thumb-top { z-index: auto; }
     .grade-range-wrap input[type=range]::-webkit-slider-thumb {
-      width: 30px; height: 30px;
+      width: 22px; height: 22px;
     }
   }
 
@@ -119,46 +119,6 @@
   .main-col { display: flex; flex-direction: column; overflow: hidden; }
 
   /* ── AI bar ── */
-  .ai-bar { padding: 12px 22px; background: #fff; border-bottom: 1px solid var(--border); }
-  .ai-label {
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--mid); margin-bottom: 5px;
-    display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
-  }
-  .ai-label:hover { color: var(--rock); }
-  .ai-label::before { content: '✦'; color: var(--sun); }
-  .ai-label .ai-toggle-arrow { margin-left: auto; font-size: 0.6rem; transition: transform 0.2s; }
-  .ai-label.open .ai-toggle-arrow { transform: rotate(180deg); }
-  .ai-body { display: none; }
-  .ai-body.open { display: block; margin-top: 8px; }
-  .ai-input-row { display: flex; gap: 7px; }
-  textarea#aiQuery {
-    flex: 1; padding: 8px 11px; border: 1.5px solid var(--border);
-    border-radius: var(--radius); font-size: 0.86rem; font-family: var(--font-ui);
-    resize: none; height: 50px; background: var(--chalk);
-  }
-  textarea#aiQuery:focus { outline: none; border-color: var(--sea); background: white; }
-  textarea#aiQuery::placeholder { color: #aaa; }
-  .ai-submit {
-    padding: 0 16px; height: 50px; background: var(--rock); color: var(--chalk);
-    border: none; border-radius: var(--radius); font-size: 0.86rem; font-weight: 600;
-    cursor: pointer; white-space: nowrap;
-  }
-  .ai-submit:hover { background: #3d3530; }
-  .ai-submit:disabled { opacity: 0.5; cursor: wait; }
-  .api-key-row { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
-  .api-key-row label { font-size: 0.73rem; color: var(--mid); white-space: nowrap; }
-  .api-key-row input {
-    flex: 1; padding: 4px 7px; border: 1px solid var(--border); border-radius: 4px;
-    font-size: 0.76rem; font-family: var(--font-mono); background: var(--chalk);
-  }
-  .ai-response {
-    margin-top: 7px; padding: 9px 13px; background: var(--sea-light);
-    border-left: 3px solid var(--sea); border-radius: 0 var(--radius) var(--radius) 0;
-    font-size: 0.83rem; line-height: 1.5; display: none;
-  }
-  .ai-response.visible { display: block; }
-  .ai-response.error { background: #fdecea; border-color: var(--unsafe); }
 
 
   /* ── Map bar ── */
@@ -374,7 +334,6 @@
   }
   .loading-bar.active { display: block; }
   @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-  .ai-highlight { background: #fffbe6 !important; border-color: #f0d060 !important; }
 
   @media(max-width:768px) {
     .app { grid-template-columns: 1fr; }
@@ -511,24 +470,6 @@
 
   <div class="main-col">
     <!-- AI bar -->
-    <div class="ai-bar">
-      <div class="ai-label" onclick="toggleAiBar(this)">Ask AI <span class="ai-toggle-arrow">▲</span></div>
-      <div class="ai-body">
-        <div class="ai-input-row">
-          <textarea id="aiQuery"
-            placeholder='e.g. "Quiet crags with 5+ routes under 6a, sunny in the morning, not too busy"'
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();runAiQuery()}"></textarea>
-          <button class="ai-submit" id="aiBtn" onclick="runAiQuery()">Ask →</button>
-        </div>
-        <div class="api-key-row">
-          <label for="apiKey">Anthropic API key</label>
-          <input type="password" id="apiKey" placeholder="sk-ant-…" autocomplete="off">
-        </div>
-        <div class="ai-response" id="aiResponse"></div>
-      </div>
-    </div>
-
-
     <!-- Map panel -->
     <div class="map-bar">
       <div class="map-label" onclick="toggleMapBar(this)">Map <span class="map-toggle-arrow">▲</span></div>
@@ -773,7 +714,7 @@ function buildSectors(crags) {
   for (const crag of crags) {
     for (const route of (crag.routes || [])) {
       const sName = route.sector || 'Unknown';
-      const key = `${crag.id ?? crag.name}||${sName}`;
+      const key = `${crag.name}||${sName}`;
       if (!map.has(key)) {
         const smeta = (crag.sectors_meta || {})[sName] || {};
         map.set(key, {
@@ -799,6 +740,8 @@ function buildSectors(crags) {
     s.grade_max = gis.length ? GRADES[Math.max(...gis)] : '?';
     const srs = rs.filter(r => r.star_rating > 0).map(r => r.star_rating);
     s.avg_star_rating = srs.length ? srs.reduce((a,b)=>a+b,0)/srs.length : 0;
+    const vlsrs = rs.filter(r => r.vl_stars > 0).map(r => r.vl_stars);
+    s.avg_vl_star_rating = vlsrs.length ? vlsrs.reduce((a,b)=>a+b,0)/vlsrs.length : 0;
     s.safe_route_count = rs.filter(r => r.bolt_status==='safe').length;
     s.recent_log_count = rs.reduce((sum,r) => sum+(r.logs||[]).filter(d=>d>=cutStr).length, 0);
     s.grades_histogram = {};
@@ -837,7 +780,7 @@ function applyFilters(ov={}) {
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
-    if (crag.avg_star_rating < f.minStars) return false;
+    if ((primaryGrade==='vl' ? crag.avg_vl_star_rating : crag.avg_star_rating) < f.minStars) return false;
 
     // Shade-at filter: exclude crags that are sunny (not shaded) at the chosen hour
     if (f.shadeAt !== null) {
@@ -862,7 +805,7 @@ function applyFilters(ov={}) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
-      case 'stars_desc':     return b.avg_star_rating - a.avg_star_rating;
+      case 'stars_desc': { const k = primaryGrade==='vl' ? 'avg_vl_star_rating' : 'avg_star_rating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
       case 'routes_desc':    return b.route_count - a.route_count;
@@ -889,7 +832,7 @@ function applyFiltersSectors(f) {
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
-    if (s.avg_star_rating < f.minStars) return false;
+    if ((primaryGrade==='vl' ? s.avg_vl_star_rating : s.avg_star_rating) < f.minStars) return false;
     if (f.shadeAt !== null) {
       const sched = getSunSchedule(s);
       if (sched !== null) {
@@ -911,7 +854,7 @@ function applyFiltersSectors(f) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
-      case 'stars_desc':     return b.avg_star_rating - a.avg_star_rating;
+      case 'stars_desc': { const k = primaryGrade==='vl' ? 'avg_vl_star_rating' : 'avg_star_rating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
       case 'routes_desc':    return b.route_count - a.route_count;
@@ -936,7 +879,6 @@ function resetFilters() {
   document.getElementById('boltUnknown').checked = true;
   document.getElementById('sortBy').value = 'norm_busy_asc';
   updateSliderLabels();
-  document.getElementById('aiResponse').className = 'ai-response';
   applyFilters();
 }
 
@@ -975,8 +917,11 @@ function sectorCard(sector, f) {
   const b = sector._dynBusyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _stars = Math.min(3, Math.max(0, Math.round(sector.avg_star_rating || 0)));
-  const starsStr = sector.avg_star_rating > 0 ? '★'.repeat(_stars)+'☆'.repeat(3-_stars) : '?';
+  const _sAvg = (primaryGrade === 'vl' ? sector.avg_vl_star_rating : sector.avg_star_rating) || 0;
+  const _sAlt = (primaryGrade === 'vl' ? sector.avg_star_rating : sector.avg_vl_star_rating) || 0;
+  const _stars = Math.min(3, Math.max(0, Math.round(_sAvg)));
+  const _starsAlt = Math.min(3, Math.max(0, Math.round(_sAlt)));
+  const starsStr = _sAvg > 0 ? '★'.repeat(_stars)+'☆'.repeat(3-_stars) : '?';
   const gradeRange = sector.grade_min && sector.grade_max
     ? (sector.grade_min===sector.grade_max ? sector.grade_min : `${sector.grade_min}–${sector.grade_max}`) : '?';
 
@@ -995,10 +940,12 @@ function sectorCard(sector, f) {
 
   const makeRow = r => {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
-    const _ukc = r.star_rating != null ? Math.min(3, Math.max(0, Math.round(r.star_rating))) : null;
-    const _vlur = r.vl_user_rating ?? null;
-    const stars = (_ukc !== null ? (_ukc > 0 ? '★'.repeat(_ukc) : '–') : '?')
-      + (_vlur !== null ? `<small style="color:var(--text-muted);margin-left:3px">VL:${_vlur.toFixed(1)}</small>` : '');
+    const _pStars = primaryGrade === 'vl' ? r.vl_stars : r.star_rating;
+    const _aStars = primaryGrade === 'vl' ? r.star_rating : r.vl_stars;
+    const _starStr = n => n == null ? '?' : (n > 0 ? '★'.repeat(Math.min(3, n)) : '–');
+    const stars = _starStr(_pStars)
+      + (_aStars != null && _aStars !== _pStars
+          ? `<span class="route-grade-alt"> / ${_starStr(_aStars)}</span>` : '');
     const ukcBadge = r.ukc_url
       ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
       : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
@@ -1044,7 +991,7 @@ function sectorCard(sector, f) {
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
-          <span class="badge badge-stars">${starsStr}${sector.avg_star_rating > 0 ? ' '+sector.avg_star_rating.toFixed(1) : ''}</span>
+          <span class="badge badge-stars">${starsStr}</span>
           ${aspectBadge}
           ${walkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
@@ -1082,13 +1029,16 @@ function cragCard(crag, f) {
   const inRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx);
   const sched   = getSunSchedule(crag);
   // Stable string key that works for both numeric UKC ids and null VL-only crags
-  const cragKey = String(crag.id ?? crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+  const cragKey = String(crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
 
   const b = crag._dynBusyness ?? crag.normalised_busyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _cragStars = Math.min(3, Math.max(0, Math.round(crag.avg_star_rating || 0)));
-  const starsStr = crag.avg_star_rating > 0 ? '★'.repeat(_cragStars)+'☆'.repeat(3-_cragStars) : '?';
+  const _cAvg = (primaryGrade === 'vl' ? crag.avg_vl_star_rating : crag.avg_star_rating) || 0;
+  const _cAlt = (primaryGrade === 'vl' ? crag.avg_star_rating : crag.avg_vl_star_rating) || 0;
+  const _cragStars = Math.min(3, Math.max(0, Math.round(_cAvg)));
+  const _cragStarsAlt = Math.min(3, Math.max(0, Math.round(_cAlt)));
+  const starsStr = _cAvg > 0 ? '★'.repeat(_cragStars)+'☆'.repeat(3-_cragStars) : '?';
   const gradeRange = crag.grade_min && crag.grade_max
     ? (crag.grade_min===crag.grade_max?crag.grade_min:`${crag.grade_min}–${crag.grade_max}`) : '?';
 
@@ -1122,10 +1072,12 @@ function cragCard(crag, f) {
 
   const makeRow = r => {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
-    const _ukc = r.star_rating != null ? Math.min(3, Math.max(0, Math.round(r.star_rating))) : null;
-    const _vlur = r.vl_user_rating ?? null;
-    const stars = (_ukc !== null ? (_ukc > 0 ? '★'.repeat(_ukc) : '–') : '?')
-      + (_vlur !== null ? `<small style="color:var(--text-muted);margin-left:3px">VL:${_vlur.toFixed(1)}</small>` : '');
+    const _pStars = primaryGrade === 'vl' ? r.vl_stars : r.star_rating;
+    const _aStars = primaryGrade === 'vl' ? r.star_rating : r.vl_stars;
+    const _starStr = n => n == null ? '?' : (n > 0 ? '★'.repeat(Math.min(3, n)) : '–');
+    const stars = _starStr(_pStars)
+      + (_aStars != null && _aStars !== _pStars
+          ? `<span class="route-grade-alt"> / ${_starStr(_aStars)}</span>` : '');
     const ukcBadge = r.ukc_url
       ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
       : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
@@ -1184,7 +1136,7 @@ function cragCard(crag, f) {
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
-          <span class="badge badge-stars">${starsStr}${crag.avg_star_rating > 0 ? ' '+crag.avg_star_rating.toFixed(1) : ''}</span>
+          <span class="badge badge-stars">${starsStr}</span>
           ${aspectBadge}
           ${cragWalkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
@@ -1391,12 +1343,6 @@ document.getElementById('shadeAt').addEventListener('change', () => { applyFilte
 document.getElementById('maxWalkIn').addEventListener('change', () => { applyFilters(); });
 
 // ── AI bar toggle ─────────────────────────────────────────────────────────
-function toggleAiBar(label) {
-  const body = label.nextElementSibling;
-  const open = body.classList.toggle('open');
-  label.classList.toggle('open', open);
-}
-
 // ── Map ───────────────────────────────────────────────────────────────────
 function toggleMapBar(label) {
   const body = label.nextElementSibling;
@@ -1416,6 +1362,19 @@ function toggleMapBar(label) {
   }
 }
 
+function openCragFromMap(key) {
+  if (!expandedCrags.has(key)) {
+    expandedCrags.add(key);
+    applyFilters();
+  }
+  setTimeout(() => {
+    const el = document.getElementById('crag-' + key);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 12;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }, 50);
+}
+
 function updateMap() {
   if (!_leafletMap) return;
   _mapMarkers.forEach(m => m.remove());
@@ -1424,11 +1383,11 @@ function updateMap() {
   if (currentMode === 'crags') {
     for (const crag of filteredCrags) {
       if (!crag.lat || !crag.lng) continue;
-      const key = String(crag.id ?? crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      const key = String(crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
       const m = L.marker([crag.lat, crag.lng])
         .addTo(_leafletMap)
         .bindTooltip(crag.name, {direction: 'top', offset: [0, -28]})
-        .on('click', () => document.getElementById('crag-' + key)?.scrollIntoView({behavior: 'smooth', block: 'start'}));
+        .on('click', () => openCragFromMap(key));
       _mapMarkers.push(m);
     }
   } else {
@@ -1441,7 +1400,7 @@ function updateMap() {
       const m = L.marker([sector.lat, sector.lng])
         .addTo(_leafletMap)
         .bindTooltip(sector.cragName, {direction: 'top', offset: [0, -28]})
-        .on('click', () => document.getElementById('crag-' + cardKey)?.scrollIntoView({behavior: 'smooth', block: 'start'}));
+        .on('click', () => openCragFromMap(cardKey));
       _mapMarkers.push(m);
     }
   }
@@ -1452,88 +1411,6 @@ function updateMap() {
 }
 
 // ── AI query ──────────────────────────────────────────────────────────────
-async function runAiQuery() {
-  const q=document.getElementById('aiQuery').value.trim();
-  const key=document.getElementById('apiKey').value.trim();
-  const respEl=document.getElementById('aiResponse');
-  const btn=document.getElementById('aiBtn');
-  if(!q) return;
-  if(!key){respEl.textContent='Enter your Anthropic API key above.';respEl.className='ai-response visible error';return;}
-  btn.disabled=true; btn.textContent='…';
-  respEl.className='ai-response visible'; respEl.textContent='Thinking…';
-
-  const summaries = allCrags.map(c => {
-    const s = getSunSchedule(c);
-    return {
-      name: c.name, route_count: c.route_count,
-      grade_min: c.grade_min, grade_max: c.grade_max,
-      grades_histogram: c.grades_histogram,
-      avg_star_rating: c.avg_star_rating,
-      normalised_busyness: c.normalised_busyness,
-      busyness_score: c.busyness_score,
-      recent_log_count: c.recent_log_count,
-      crag_age_years: c.crag_age_years,
-      safe_route_count: c.safe_route_count,
-      aspect_raw: c.aspect_raw,
-      sun_hours: s?.totalSunHours ?? null,
-    };
-  });
-
-  const dateStr = `${currentDate.year}-${String(currentDate.month).padStart(2,'0')}-${String(currentDate.day).padStart(2,'0')}`;
-  const system = `You are a Kalymnos climbing assistant. You have data on ${allCrags.length} crags for trip date ${dateStr}.
-French sport grades (index 0–32): ${GRADES.join(', ')}.
-Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, dynamically computed from logs in the selected grade range), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (avg sun hours across sectors, 8am–8pm window).
-Interpret natural language queries. Return ONLY a JSON object with:
-  "explanation": 1–2 sentence summary
-  "crag_names": ordered array (best first, max 20)
-  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, shadeAt (8–19 int hour or null), sortBy }
-No markdown, no preamble. Raw JSON only.`;
-
-  try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:1000, system,
-        messages:[{role:'user',content:`Data:\n${JSON.stringify(summaries)}\n\nQuery: "${q}"`}]
-      })
-    });
-    if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${r.status}`);}
-    const data=await r.json();
-    const raw=data.content?.map(b=>b.text||'').join('')||'';
-    let parsed;
-    try{parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());}
-    catch{respEl.className='ai-response visible';respEl.textContent=raw;return;}
-
-    respEl.className='ai-response visible';
-    respEl.innerHTML=`<strong>AI:</strong> ${parsed.explanation||''}`;
-
-    if(parsed.filter_config){
-      const fc=parsed.filter_config;
-      if(fc.gradeMinIdx!==undefined) document.getElementById('gradeMin').value=fc.gradeMinIdx;
-      if(fc.gradeMaxIdx!==undefined) document.getElementById('gradeMax').value=fc.gradeMaxIdx;
-      if(fc.minRoutes!==undefined)   document.getElementById('minRoutes').value=fc.minRoutes;
-      if(fc.shadeAt!==undefined)     document.getElementById('shadeAt').value=fc.shadeAt??'any';
-      if(fc.sortBy!==undefined)      document.getElementById('sortBy').value=fc.sortBy;
-      updateSliderLabels();
-    }
-
-    if(parsed.crag_names?.length){
-      const order=new Map(parsed.crag_names.map((n,i)=>[n.toLowerCase(),i]));
-      const matched=allCrags
-        .filter(c=>order.has(c.name.toLowerCase()))
-        .sort((a,b)=>order.get(a.name.toLowerCase())-order.get(b.name.toLowerCase()));
-      filteredCrags=matched;
-      const filters=getFilters();
-      document.getElementById('resultsCount').innerHTML=`<strong>${matched.length}</strong> crags from AI`;
-      document.getElementById('cragList').innerHTML=matched.map(c=>cragCard(c,filters)).join('');
-      matched.forEach(c=>document.getElementById(`crag-${c.id}`)?.classList.add('ai-highlight'));
-    }
-  } catch(e){
-    respEl.className='ai-response visible error'; respEl.textContent=`Error: ${e.message}`;
-  } finally { btn.disabled=false; btn.textContent='Ask →'; }
-}
-
 // ── Bar chart renderer ────────────────────────────────────────────────────
 // values: array of numbers (already normalised/averaged)
 // opts: { labels, labelEvery, colorFn, highlightFn, chartClass, truncateAxis, pctTooltip }
