@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kalymnos Crag Finder</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
   :root {
     --rock:      #2a2420;
@@ -138,6 +140,21 @@
   .ai-response.visible { display: block; }
   .ai-response.error { background: #fdecea; border-color: var(--unsafe); }
 
+
+  /* ── Map bar ── */
+  .map-bar { padding: 12px 22px; background: #fff; border-bottom: 1px solid var(--border); }
+  .map-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--mid);
+    display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
+  }
+  .map-label:hover { color: var(--rock); }
+  .map-label::before { content: '⊙'; color: var(--sea); }
+  .map-label .map-toggle-arrow { margin-left: auto; font-size: 0.6rem; transition: transform 0.2s; }
+  .map-label.open .map-toggle-arrow { transform: rotate(180deg); }
+  .map-body { display: none; }
+  .map-body.open { display: block; margin-top: 8px; }
+  #cragsMap { height: 340px; border-radius: var(--radius); border: 1px solid var(--border); }
 
   /* ── Results ── */
   .results { padding: 18px 22px; overflow-y: auto; flex: 1; }
@@ -463,6 +480,14 @@
     </div>
 
 
+    <!-- Map panel -->
+    <div class="map-bar">
+      <div class="map-label" onclick="toggleMapBar(this)">Map <span class="map-toggle-arrow">▲</span></div>
+      <div class="map-body" id="mapBody">
+        <div id="cragsMap"></div>
+      </div>
+    </div>
+
     <!-- Overview aggregate panel -->
     <div class="overview-panel" id="overviewPanel">
       <button class="overview-toggle" id="overviewToggle" onclick="toggleOverview()">
@@ -571,6 +596,7 @@ let allCrags = [], filteredCrags = [], expandedCrags = new Set();
 let allSectors = [], filteredSectors = [];
 let currentMode = 'crags';
 let primaryGrade = 'vl';
+let _leafletMap = null, _mapMarkers = [];
 const _today = new Date();
 let currentDate = { year: _today.getFullYear(), month: _today.getMonth()+1, day: _today.getDate() };
 let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
@@ -866,6 +892,7 @@ function renderCrags(crags, filters) {
     return;
   }
   list.innerHTML = crags.map(c => cragCard(c, filters)).join('');
+  updateMap();
 }
 
 function renderSectors(sectors, filters) {
@@ -874,9 +901,11 @@ function renderSectors(sectors, filters) {
   renderOverview(sectors, filters.gradeMinIdx, filters.gradeMaxIdx);
   if (!sectors.length) {
     list.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>No sectors match these filters.</p></div>`;
+    updateMap();
     return;
   }
   list.innerHTML = sectors.map(s => sectorCard(s, filters)).join('');
+  updateMap();
 }
 
 function sectorCard(sector, f) {
@@ -1294,6 +1323,60 @@ function toggleAiBar(label) {
   const body = label.nextElementSibling;
   const open = body.classList.toggle('open');
   label.classList.toggle('open', open);
+}
+
+// ── Map ───────────────────────────────────────────────────────────────────
+function toggleMapBar(label) {
+  const body = label.nextElementSibling;
+  const open = body.classList.toggle('open');
+  label.classList.toggle('open', open);
+  if (open) {
+    if (!_leafletMap) {
+      _leafletMap = L.map('cragsMap').setView([36.95, 26.98], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 18,
+      }).addTo(_leafletMap);
+      updateMap();
+    } else {
+      _leafletMap.invalidateSize();
+    }
+  }
+}
+
+function updateMap() {
+  if (!_leafletMap) return;
+  _mapMarkers.forEach(m => m.remove());
+  _mapMarkers = [];
+
+  if (currentMode === 'crags') {
+    for (const crag of filteredCrags) {
+      if (!crag.lat || !crag.lng) continue;
+      const key = String(crag.id ?? crag.name).replace(/[^a-zA-Z0-9_-]/g, '-');
+      const m = L.marker([crag.lat, crag.lng])
+        .addTo(_leafletMap)
+        .bindTooltip(crag.name, {direction: 'top', offset: [0, -28]})
+        .on('click', () => document.getElementById('crag-' + key)?.scrollIntoView({behavior: 'smooth', block: 'start'}));
+      _mapMarkers.push(m);
+    }
+  } else {
+    const seen = new Set();
+    for (const sector of filteredSectors) {
+      if (seen.has(sector.cragName)) continue;
+      seen.add(sector.cragName);
+      if (!sector.lat || !sector.lng) continue;
+      const cardKey = String(sector.id).replace(/[^a-zA-Z0-9_-]/g, '-');
+      const m = L.marker([sector.lat, sector.lng])
+        .addTo(_leafletMap)
+        .bindTooltip(sector.cragName, {direction: 'top', offset: [0, -28]})
+        .on('click', () => document.getElementById('crag-' + cardKey)?.scrollIntoView({behavior: 'smooth', block: 'start'}));
+      _mapMarkers.push(m);
+    }
+  }
+
+  if (_mapMarkers.length > 0) {
+    _leafletMap.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.15));
+  }
 }
 
 // ── AI query ──────────────────────────────────────────────────────────────
