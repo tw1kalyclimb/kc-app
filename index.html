@@ -788,6 +788,7 @@ function applyFilters(ov={}) {
   if (currentMode === 'sectors') { applyFiltersSectors(f); return; }
 
   filteredCrags = allCrags.filter(crag => {
+    if (crag.name === 'Unknown Crag') return false;
     if (f.search) {
       const q = f.search;
       const nameMatch = crag.name.toLowerCase().includes(q);
@@ -841,6 +842,7 @@ function applyFilters(ov={}) {
 
 function applyFiltersSectors(f) {
   filteredSectors = allSectors.filter(s => {
+    if (s.cragName === 'Unknown Crag') return false;
     if (f.search) {
       const q = f.search;
       const nameMatch = s.cragName.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
