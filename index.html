@@ -138,18 +138,6 @@
   .ai-response.visible { display: block; }
   .ai-response.error { background: #fdecea; border-color: var(--unsafe); }
 
-  /* ── Date picker ── */
-  .date-bar {
-    padding: 9px 22px; background: var(--sun-light); border-bottom: 1px solid #f0d090;
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  }
-  .date-bar label { font-size: 0.78rem; font-weight: 600; color: var(--rock); white-space: nowrap; }
-  .date-bar input[type=date] {
-    padding: 4px 8px; border: 1px solid #d0b060; border-radius: var(--radius);
-    font-size: 0.81rem; font-family: var(--font-ui); background: white; cursor: pointer;
-  }
-  .date-bar .date-hint { font-size: 0.73rem; color: var(--mid); }
-  .date-bar .sun-time-local { font-size: 0.73rem; color: var(--mid); }
 
   /* ── Results ── */
   .results { padding: 18px 22px; overflow-y: auto; flex: 1; }
@@ -193,10 +181,12 @@
   .stat-sub { font-size: 0.67rem; color: var(--mid); }
 
   /* Grade bar */
-  .grade-bar { display: flex; gap: 2px; margin-top: 11px; height: 18px; border-radius: 3px; overflow: hidden; }
+  .grade-bar { display: flex; gap: 2px; margin-top: 11px; height: 18px; }
   .grade-seg {
     height: 100%; cursor: default; position: relative; transition: opacity 0.2s;
   }
+  .grade-seg:first-child { border-radius: 3px 0 0 3px; }
+  .grade-seg:last-child  { border-radius: 0 3px 3px 0; }
   .grade-seg:hover::after {
     content: attr(data-tip); position: absolute; top: 22px; left: 50%;
     transform: translateX(-50%); background: var(--rock); color: white;
@@ -387,13 +377,13 @@
       </div>
     </div>
     <div class="filter-group">
-      <div class="filter-label">Min <span id="gradeMinLabel">4a</span></div>
-      <div class="filter-label">Max <span id="gradeMaxLabel">8b</span></div>
+      <div class="filter-label">Min <span id="gradeMinLabel">3a</span></div>
+      <div class="filter-label">Max <span id="gradeMaxLabel">9a</span></div>
       <div class="grade-range-wrap">
         <div id="gradeTrackBg"></div>
         <div id="gradeTrack"></div>
-        <input type="range" id="gradeMin" min="0" max="24" value="0">
-        <input type="range" id="gradeMax" min="0" max="24" value="24">
+        <input type="range" id="gradeMin" min="0" max="32" value="0">
+        <input type="range" id="gradeMax" min="0" max="32" value="32">
       </div>
     </div>
 
@@ -412,15 +402,22 @@
 
     <h2>Sun Preference</h2>
     <div class="filter-group">
-      <div class="filter-label">Min sun hours <span id="minSunLabel">Any</span></div>
-      <input type="range" id="minSun" min="0" max="12" value="0" step="1">
-    </div>
-    <div class="filter-group">
-      <div class="filter-label">Max sun hours <span id="maxSunLabel">Any</span></div>
-      <input type="range" id="maxSun" min="0" max="12" value="12" step="1">
-      <div style="font-size:0.68rem;color:var(--mid);margin-top:4px">
-        Use max sun for shady crags on hot days.
-      </div>
+      <div class="filter-label">I need shade at</div>
+      <select id="shadeAt" style="width:100%;padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:0.82rem;font-family:var(--font-ui);background:white;cursor:pointer">
+        <option value="any">Any time (no preference)</option>
+        <option value="8">08:00</option>
+        <option value="9">09:00</option>
+        <option value="10">10:00</option>
+        <option value="11">11:00</option>
+        <option value="12">12:00</option>
+        <option value="13">13:00</option>
+        <option value="14">14:00</option>
+        <option value="15">15:00</option>
+        <option value="16">16:00</option>
+        <option value="17">17:00</option>
+        <option value="18">18:00</option>
+        <option value="19">19:00</option>
+      </select>
     </div>
 
     <h2>Route Safety</h2>
@@ -465,13 +462,6 @@
       </div>
     </div>
 
-    <!-- Date picker for sun calculations -->
-    <div class="date-bar">
-      <label for="tripDate">☀ Trip date</label>
-      <input type="date" id="tripDate">
-      <span class="date-hint">Sun/shade times update for your selected date</span>
-      <span class="sun-time-local" id="localTimeInfo"></span>
-    </div>
 
     <!-- Overview aggregate panel -->
     <div class="overview-panel" id="overviewPanel">
@@ -506,60 +496,74 @@
 
 <script>
 // ── Constants ─────────────────────────────────────────────────────────────
-const GRADES = ["4a","4b","4c","4c+","5a","5a+","5b","5b+","5c","5c+","6a","6a+","6b","6b+","6c","6c+","7a","7a+","7b","7b+","7c","7c+","8a","8a+","8b"];
+const GRADES = ["3a","3b","3c","3c+","4a","4b","4c","4c+","5a","5a+","5b","5b+","5c","5c+","6a","6a+","6b","6b+","6c","6c+","7a","7a+","7b","7b+","7c","7c+","8a","8a+","8b","8b+","8c","8c+","9a"];
 const GRADE_IDX = Object.fromEntries(GRADES.map((g,i)=>[g,i]));
-const KALYMNOS_LAT = 37.0, KALYMNOS_LON = 26.98;
-
-function gradeColor(idx) {
-  const t = idx / (GRADES.length - 1);
-  if (t < 0.35) return `hsl(${120-t*80},55%,${48+t*10}%)`;
-  if (t < 0.65) return `hsl(${90-t*200},65%,50%)`;
-  return `hsl(0,72%,${48-(t-0.65)*18}%)`;
+// Grade groups: x and x+ merged; 3s+4a → '≤4a'; 7+ → single bucket
+// green (≤4a/4b/4c) → orange (5s–6a+) → red (6b+)
+const BASE_GRADES       = ['≤4a','4b','4c','5a','5b','5c','6a','6b','6c','7+'];
+const BASE_GRADE_COLORS = [
+  'hsl(128,52%,60%)', // ≤4a
+  'hsl(124,54%,49%)', // 4b
+  'hsl(120,57%,42%)', // 4c / 4c+
+  'hsl(40,92%,62%)',  // 5a / 5a+
+  'hsl(36,90%,52%)',  // 5b / 5b+
+  'hsl(30,90%,43%)',  // 5c / 5c+
+  'hsl(23,88%,42%)',  // 6a / 6a+
+  'hsl(8,68%,52%)',   // 6b / 6b+
+  'hsl(5,70%,46%)',   // 6c / 6c+
+  'hsl(0,72%,32%)',   // 7+
+];
+function gradeBase(g) {
+  const n = parseInt(g);
+  if (n >= 7) return '7+';
+  if (n <= 3 || g === '4a') return '≤4a';
+  return g.replace('+','');
+}
+const BASE_TO_IDXS = BASE_GRADES.map(b => GRADES.reduce((a,g,i)=>(gradeBase(g)===b?[...a,i]:a),[]));
+function gradeBarSegs(hist, total, f) {
+  return BASE_GRADES.map((b, bi) => {
+    const idxs = BASE_TO_IDXS[bi];
+    const cnt  = idxs.reduce((s,i)=>s+(hist[GRADES[i]]||0),0);
+    if (!cnt) return '';
+    const pct  = (cnt/total*100).toFixed(1);
+    const inRange = idxs.some(i=>i>=f.gradeMinIdx&&i<=f.gradeMaxIdx);
+    const fade = inRange ? '' : 'opacity:0.28;';
+    const label = (b==='7+'||b==='≤4a') ? b : idxs.length===2 ? `${b}–${b}+` : b;
+    return `<div class="grade-seg" style="width:${pct}%;background:${BASE_GRADE_COLORS[bi]};${fade}" data-tip="${label}: ${cnt} route${cnt===1?'':'s'}"></div>`;
+  }).join('');
 }
 
-// ── Sun math (matches Python scraper exactly) ─────────────────────────────
-function sunPosition(latDeg, lonDeg, year, month, day, hourUtc) {
-  const lat = latDeg * Math.PI / 180;
-  const N1 = Math.floor(275*month/9);
-  const N2 = Math.floor((month+9)/12);
-  const N3 = 1 + Math.floor((year - 4*Math.floor(year/4) + 2)/3);
-  const N  = N1 - N2*N3 + day - 30;
-  const B  = (360/365*(N-81)) * Math.PI/180;
-  const EoT = 9.87*Math.sin(2*B) - 7.53*Math.cos(B) - 1.5*Math.sin(B);
-  const solarTime = hourUtc*60 + 4*lonDeg + EoT;
-  const HRA = (0.25*(solarTime-720)) * Math.PI/180;
-  const dec = (23.45*Math.sin((360/365*(N-81))*Math.PI/180)) * Math.PI/180;
-  const cosZ = Math.sin(lat)*Math.sin(dec) + Math.cos(lat)*Math.cos(dec)*Math.cos(HRA);
-  const elev = Math.asin(Math.max(-1,Math.min(1,cosZ))) * 180/Math.PI;
-  let az = 0;
-  if (elev > -0.833) {
-    const se = Math.max(0.01, Math.abs(elev)) * Math.PI/180;
-    const cosAz = (Math.sin(dec)*Math.cos(lat) - Math.cos(dec)*Math.sin(lat)*Math.cos(HRA)) / Math.cos(se);
-    az = Math.acos(Math.max(-1,Math.min(1,cosAz))) * 180/Math.PI;
-    if (solarTime > 720) az = 360 - az;
-  }
-  return [Math.round(az*10)/10, Math.round(elev*10)/10];
+// ── Sun schedule (from cragdata_raw sun_start / sun_end) ─────────────────
+const SUN_DAY_START = 8, SUN_DAY_END = 20;
+
+function formatHour(h) {
+  const whole = Math.floor(h);
+  const mins  = Math.round((h - whole) * 60);
+  return `${String(whole).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
 }
 
-function computeSunSchedule(aspectDeg, year, month, day, lat = KALYMNOS_LAT, lng = KALYMNOS_LON) {
-  if (aspectDeg == null) return null;
-  const schedule = [];
-  for (let hLocal = 6; hLocal <= 20; hLocal++) {
-    const hUtc = hLocal - 3; // EEST = UTC+3
-    const [az, alt] = sunPosition(lat, lng, year, month, day, hUtc);
-    const diff = Math.abs(az - aspectDeg) % 360;
-    const angDiff = diff <= 180 ? diff : 360 - diff;
-    const isSunny = alt > 5 && angDiff <= 90;
-    schedule.push([hLocal, az, alt, isSunny]);
+function buildSunSchedule(sunStart, sunEnd) {
+  if (sunStart == null && sunEnd == null) return null;
+  const start = sunStart ?? 0;
+  const end   = sunEnd   ?? 24;
+
+  // One slot per hour, 8–20
+  const slots = [];
+  for (let h = SUN_DAY_START; h < SUN_DAY_END; h++) {
+    const sunny = h >= start && h < end;
+    slots.push({ hour: h, sunny, fraction: sunny ? 1 : 0 });
   }
-  const sunnyHours = schedule.filter(s=>s[3]).map(s=>s[0]);
-  return {
-    aspectDeg,
-    sunHours: schedule,
-    sunnyFrom:  sunnyHours.length ? `${String(sunnyHours[0]).padStart(2,'0')}:00` : null,
-    sunnyUntil: sunnyHours.length ? `${String(sunnyHours[sunnyHours.length-1]+1).padStart(2,'0')}:00` : null,
-    totalSunHours: sunnyHours.length,
-  };
+  const totalSunHours = slots.filter(s => s.sunny).length;
+
+  // Shade description: only describe shade that falls within the 8–20 window
+  const parts = [];
+  if (start > SUN_DAY_START) parts.push(`shade until ${formatHour(start)}`);
+  if (end   < SUN_DAY_END)   parts.push(`shade after ${formatHour(end)}`);
+  const shadeDesc = totalSunHours === 0 ? 'always shaded'
+                  : parts.length       ? parts.join(', ')
+                  : null;
+
+  return { slots, totalSunHours, shadeDesc };
 }
 
 // ── App state ──────────────────────────────────────────────────────────────
@@ -567,41 +571,33 @@ let allCrags = [], filteredCrags = [], expandedCrags = new Set();
 let allSectors = [], filteredSectors = [];
 let currentMode = 'crags';
 let primaryGrade = 'vl';
-let currentDate = { year: 2024, month: 10, day: 15 }; // default Oct 15
-let sunScheduleCache = {}; // crag.id -> computed schedule for currentDate
+const _today = new Date();
+let currentDate = { year: _today.getFullYear(), month: _today.getMonth()+1, day: _today.getDate() };
 let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
 
-// ── Date picker ───────────────────────────────────────────────────────────
-function initDatePicker() {
-  const today = new Date();
-  // Default to next Oct 15 (or this year's if in future)
-  const y = today.getMonth() >= 9 ? today.getFullYear() + 1 : today.getFullYear();
-  const defaultDate = `${y}-10-15`;
-  document.getElementById('tripDate').value = defaultDate;
-  onDateChange();
-}
 
-function onDateChange() {
-  const val = document.getElementById('tripDate').value;
-  if (!val) return;
-  const [y,m,d] = val.split('-').map(Number);
-  currentDate = { year: y, month: m, day: d };
-  sunScheduleCache = {}; // invalidate cache
-  applyFilters();
-  // Re-render overview so trip-week highlight updates
-  renderOverview(filteredCrags);
-}
-document.getElementById('tripDate').addEventListener('change', onDateChange);
-
-function getSunSchedule(crag) {
-  if (crag.aspect_deg == null) return null;
-  const key = `${crag.id}-${currentDate.year}-${currentDate.month}-${currentDate.day}`;
-  if (!sunScheduleCache[key]) {
-    const lat = crag.lat ?? KALYMNOS_LAT;
-    const lng = crag.lng ?? KALYMNOS_LON;
-    sunScheduleCache[key] = computeSunSchedule(crag.aspect_deg, currentDate.year, currentDate.month, currentDate.day, lat, lng);
+function getSunSchedule(item) {
+  // Sector: has sun_start/sun_end directly
+  if (item.sun_start != null || item.sun_end != null) {
+    return buildSunSchedule(item.sun_start, item.sun_end);
   }
-  return sunScheduleCache[key];
+  // Crag: average sun across sectors, producing fractional slots for display
+  if (item.sectors_meta) {
+    const entries = Object.values(item.sectors_meta)
+      .filter(s => s.sun_start != null || s.sun_end != null);
+    if (!entries.length) return null;
+    const schedules = entries.map(s => buildSunSchedule(s.sun_start, s.sun_end)).filter(Boolean);
+    const n = schedules.length;
+    const slots = [];
+    for (let h = SUN_DAY_START; h < SUN_DAY_END; h++) {
+      const i = h - SUN_DAY_START;
+      const fraction = schedules.reduce((sum, sc) => sum + sc.slots[i].fraction, 0) / n;
+      slots.push({ hour: h, sunny: fraction > 0.5, fraction });
+    }
+    const totalSunHours = Math.round(schedules.reduce((s, sc) => s + sc.totalSunHours, 0) / n);
+    return { slots, totalSunHours, shadeDesc: null };
+  }
+  return null;
 }
 
 // ── Data loading ──────────────────────────────────────────────────────────
@@ -647,8 +643,7 @@ function getFilters() {
     gradeMinIdx: Math.min(a,b), gradeMaxIdx: Math.max(a,b),
     minRoutes:   parseInt(document.getElementById('minRoutes').value),
     minStars:    parseFloat(document.getElementById('minStars').value),
-    minSun:      parseInt(document.getElementById('minSun').value),
-    maxSun:      parseInt(document.getElementById('maxSun').value),
+    shadeAt:     document.getElementById('shadeAt').value === 'any' ? null : parseInt(document.getElementById('shadeAt').value),
     boltSafe:    document.getElementById('boltSafe').checked,
     boltRecent:  document.getElementById('boltRecent').checked,
     boltUnknown: document.getElementById('boltUnknown').checked,
@@ -760,12 +755,13 @@ function applyFilters(ov={}) {
     if (visibleInRange.length < f.minRoutes) return false;
     if (crag.avg_star_rating < f.minStars) return false;
 
-    // Sun filter (only applies if crag has aspect data)
-    const sched = getSunSchedule(crag);
-    if (sched !== null) {
-      const sh = sched.totalSunHours;
-      if (sh < f.minSun) return false;
-      if (sh > f.maxSun) return false;
+    // Shade-at filter: exclude crags that are sunny (not shaded) at the chosen hour
+    if (f.shadeAt !== null) {
+      const sched = getSunSchedule(crag);
+      if (sched !== null) {
+        const slot = sched.slots[f.shadeAt - SUN_DAY_START];
+        if (slot && slot.fraction > 0.5) return false;
+      }
     }
     return true;
   });
@@ -806,10 +802,12 @@ function applyFiltersSectors(f) {
     );
     if (visibleInRange.length < f.minRoutes) return false;
     if (s.avg_star_rating < f.minStars) return false;
-    const sched = getSunSchedule(s);
-    if (sched !== null) {
-      const sh = sched.totalSunHours;
-      if (sh < f.minSun || sh > f.maxSun) return false;
+    if (f.shadeAt !== null) {
+      const sched = getSunSchedule(s);
+      if (sched !== null) {
+        const slot = sched.slots[f.shadeAt - SUN_DAY_START];
+        if (slot && slot.fraction > 0.5) return false;
+      }
     }
     return true;
   });
@@ -837,11 +835,10 @@ function applyFiltersSectors(f) {
 
 function resetFilters() {
   document.getElementById('gradeMin').value = 0;
-  document.getElementById('gradeMax').value = 24;
+  document.getElementById('gradeMax').value = 32;
   document.getElementById('minRoutes').value = 1;
   document.getElementById('minStars').value = 0;
-  document.getElementById('minSun').value = 0;
-  document.getElementById('maxSun').value = 12;
+  document.getElementById('shadeAt').value = 'any';
   document.getElementById('boltSafe').checked = true;
   document.getElementById('boltRecent').checked = true;
   document.getElementById('boltUnknown').checked = true;
@@ -889,13 +886,8 @@ function sectorCard(sector, f) {
     ? (sector.grade_min===sector.grade_max ? sector.grade_min : `${sector.grade_min}–${sector.grade_max}`) : '?';
 
   const hist = sector.grades_histogram || {};
-  const total = Object.values(hist).reduce((s,v)=>s+v,0);
-  const barSegs = GRADES.map((g,i) => {
-    const cnt = hist[g]||0; if (!cnt) return '';
-    const pct = (cnt/total*100).toFixed(1);
-    const fade = (i<f.gradeMinIdx||i>f.gradeMaxIdx)?'opacity:0.28;':'';
-    return `<div class="grade-seg" style="width:${pct}%;background:${gradeColor(i)};${fade}" data-tip="${g}: ${cnt}"></div>`;
-  }).join('');
+  const total = Object.entries(hist).reduce((s,[g,v])=>GRADE_IDX[g]!==undefined?s+v:s,0);
+  const barSegs = gradeBarSegs(hist, total, f);
 
   const sunHtml = renderSunTimeline(sched, sector);
   const sparkHtml = renderSparkline(routes, f.gradeMinIdx, f.gradeMaxIdx);
@@ -964,10 +956,7 @@ function sectorCard(sector, f) {
         <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
       </div>
       <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe Routes</span></div>
-      ${sched ? `<div class="stat">
-        <span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span>
-        ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
-      </div>` : ''}
+      ${sched ? `<div class="stat"><span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span></div>` : ''}
       ${sector.walk_in != null ? `<div class="stat"><span class="stat-val">${sector.walk_in}min</span><span class="stat-label">Walk in</span></div>` : ''}
     </div>
     <div class="grade-bar">${barSegs}</div>
@@ -1003,13 +992,8 @@ function cragCard(crag, f) {
 
   // Grade histogram bar
   const hist = crag.grades_histogram||{};
-  const total = Object.values(hist).reduce((s,v)=>s+v,0);
-  const barSegs = GRADES.map((g,i)=>{
-    const cnt=hist[g]||0; if(!cnt) return '';
-    const pct=(cnt/total*100).toFixed(1);
-    const fade=(i<f.gradeMinIdx||i>f.gradeMaxIdx)?'opacity:0.28;':'';
-    return `<div class="grade-seg" style="width:${pct}%;background:${gradeColor(i)};${fade}" data-tip="${g}: ${cnt}"></div>`;
-  }).join('');
+  const total = Object.entries(hist).reduce((s,[g,v])=>GRADE_IDX[g]!==undefined?s+v:s,0);
+  const barSegs = gradeBarSegs(hist, total, f);
 
   // Sun timeline
   const sunHtml = renderSunTimeline(sched, crag);
@@ -1116,11 +1100,7 @@ function cragCard(crag, f) {
         <span class="stat-val">${crag.safe_route_count??'?'}</span>
         <span class="stat-label">Safe Routes</span>
       </div>
-      ${sched ? `<div class="stat">
-        <span class="stat-val">${sched.totalSunHours}h</span>
-        <span class="stat-label">Sun hrs</span>
-        ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
-      </div>` : ''}
+      ${sched ? `<div class="stat"><span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span></div>` : ''}
     </div>
 
     <div class="grade-bar">${barSegs}</div>
@@ -1140,31 +1120,24 @@ function cragCard(crag, f) {
   </div>`;
 }
 
-function renderSunTimeline(sched, crag) {
-  if (!sched) {
-    return `<div class="sun-row">
-      <span class="sun-label">☀ Sun</span>
-      <span class="sun-info none">No aspect data</span>
-    </div>`;
-  }
+function renderSunTimeline(sched) {
+  if (!sched || !sched.slots) return '';
 
-  const segs = sched.sunHours.map(([h, az, alt, isSunny]) => {
-    const cls = alt <= 0 ? 'norise' : isSunny ? 'sunny' : 'shade';
-    const dir = azToCompass(az);
-    const tip = `${h}:00 — sun at ${az}° (${dir}), ${alt}° high — ${isSunny?'☀ SUN':'◑ shade'}`;
-    return `<div class="sun-seg ${cls}" data-tip="${tip}"></div>`;
+  const segs = sched.slots.map(({hour, sunny, fraction}) => {
+    const frac = fraction ?? (sunny ? 1 : 0);
+    const label = frac === 1 ? '☀ sun' : frac === 0 ? '◑ shade' : `☀ sun (${Math.round(frac*100)}% of sectors)`;
+    const tip = `${String(hour).padStart(2,'0')}:00–${String(hour+1).padStart(2,'0')}:00 — ${label}`;
+    const cls  = frac > 0 ? 'sunny' : 'shade';
+    const style = frac > 0 && frac < 1 ? ` style="opacity:${(0.25 + frac * 0.75).toFixed(2)}"` : '';
+    return `<div class="sun-seg ${cls}"${style} data-tip="${tip}"></div>`;
   }).join('');
 
-  const info = sched.sunnyFrom
-    ? `${sched.sunnyFrom}–${sched.sunnyUntil}`
-    : 'No direct sun';
-  const infoCls = sched.totalSunHours > 6 ? 'good' : sched.totalSunHours === 0 ? 'none' : '';
-
-  // Hour labels
-  const labels = sched.sunHours.map(([h])=>h);
   const labelHtml = `<div style="display:flex;gap:1px;flex:1;margin-top:2px">
-    ${labels.map((h,i)=>`<div style="flex:1;font-size:0.58rem;color:#aaa;text-align:center">${h%3===0?h:''}</div>`).join('')}
+    ${sched.slots.map(({hour}) => `<div style="flex:1;font-size:0.58rem;color:#aaa;text-align:center">${hour % 4 === 0 ? hour : ''}</div>`).join('')}
   </div>`;
+
+  const descCls = sched.totalSunHours === 0 ? 'none' : '';
+  const desc = sched.shadeDesc ?? '';
 
   return `<div class="sun-row">
     <span class="sun-label">☀ Sun</span>
@@ -1172,7 +1145,7 @@ function renderSunTimeline(sched, crag) {
       <div class="sun-timeline">${segs}</div>
       ${labelHtml}
     </div>
-    <span class="sun-info ${infoCls}">${info}</span>
+    ${desc ? `<span class="sun-info ${descCls}">${desc}</span>` : ''}
   </div>`;
 }
 
@@ -1245,10 +1218,6 @@ function renderSparkline(routes, minIdx, maxIdx) {
   </div>`;
 }
 
-function azToCompass(az) {
-  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  return dirs[Math.round(az/22.5)%16];
-}
 
 function toggleRoutes(id) {
   expandedCrags.has(id) ? expandedCrags.delete(id) : expandedCrags.add(id);
@@ -1265,12 +1234,8 @@ function updateSliderLabels() {
   document.getElementById('minRoutesLabel').textContent = document.getElementById('minRoutes').value;
   const sv=parseFloat(document.getElementById('minStars').value);
   document.getElementById('minStarsLabel').textContent = sv===0?'Any':sv.toFixed(1)+'★';
-  const minS=parseInt(document.getElementById('minSun').value);
-  const maxS=parseInt(document.getElementById('maxSun').value);
-  document.getElementById('minSunLabel').textContent = minS===0?'Any':minS+'h';
-  document.getElementById('maxSunLabel').textContent = maxS===12?'Any':maxS+'h';
   // Grade track — offset by 7px (half thumb width) so fill aligns with thumb centres
-  const mn=Math.min(a,b)/24*100, mx=Math.max(a,b)/24*100;
+  const _gradeMax=GRADES.length-1, mn=Math.min(a,b)/_gradeMax*100, mx=Math.max(a,b)/_gradeMax*100;
   const t=document.getElementById('gradeTrack');
   const wrap = t.parentElement;
   const usable = wrap.offsetWidth - 14; // total travel width (full width minus one thumb)
@@ -1300,13 +1265,15 @@ function updateSliderLabels() {
   }, {passive: true});
 });
 let _applyDebounce;
-['gradeMin','gradeMax','minRoutes','minStars','minSun','maxSun'].forEach(id => {
+['gradeMin','gradeMax','minRoutes','minStars'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     updateSliderLabels();
     clearTimeout(_applyDebounce);
     _applyDebounce = setTimeout(applyFilters, 80);
   });
 });
+
+document.getElementById('shadeAt').addEventListener('change', () => { applyFilters(); });
 
 // ── AI bar toggle ─────────────────────────────────────────────────────────
 function toggleAiBar(label) {
@@ -1340,19 +1307,17 @@ async function runAiQuery() {
       safe_route_count: c.safe_route_count,
       aspect_raw: c.aspect_raw,
       sun_hours: s?.totalSunHours ?? null,
-      sunny_from: s?.sunnyFrom ?? null,
-      sunny_until: s?.sunnyUntil ?? null,
     };
   });
 
   const dateStr = `${currentDate.year}-${String(currentDate.month).padStart(2,'0')}-${String(currentDate.day).padStart(2,'0')}`;
   const system = `You are a Kalymnos climbing assistant. You have data on ${allCrags.length} crags for trip date ${dateStr}.
-French sport grades (index 0–24): ${GRADES.join(', ')}.
-Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, dynamically computed from logs in the selected grade range), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (total sun hours on the trip date), sunny_from/sunny_until (local times).
+French sport grades (index 0–32): ${GRADES.join(', ')}.
+Crag fields: name, route_count, grade_min, grade_max, grades_histogram (grade→count), avg_star_rating (0–3), normalised_busyness (0–1, dynamically computed from logs in the selected grade range), recent_log_count (12mo), crag_age_years, safe_route_count, aspect_raw (compass direction crag faces), sun_hours (avg sun hours across sectors, 8am–8pm window).
 Interpret natural language queries. Return ONLY a JSON object with:
   "explanation": 1–2 sentence summary
   "crag_names": ordered array (best first, max 20)
-  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, minSun, maxSun (0–12 int), sortBy }
+  "filter_config": optional { gradeMinIdx, gradeMaxIdx, minRoutes, shadeAt (8–19 int hour or null), sortBy }
 No markdown, no preamble. Raw JSON only.`;
 
   try {
@@ -1379,8 +1344,7 @@ No markdown, no preamble. Raw JSON only.`;
       if(fc.gradeMinIdx!==undefined) document.getElementById('gradeMin').value=fc.gradeMinIdx;
       if(fc.gradeMaxIdx!==undefined) document.getElementById('gradeMax').value=fc.gradeMaxIdx;
       if(fc.minRoutes!==undefined)   document.getElementById('minRoutes').value=fc.minRoutes;
-      if(fc.minSun!==undefined)      document.getElementById('minSun').value=fc.minSun;
-      if(fc.maxSun!==undefined)      document.getElementById('maxSun').value=fc.maxSun;
+      if(fc.shadeAt!==undefined)     document.getElementById('shadeAt').value=fc.shadeAt??'any';
       if(fc.sortBy!==undefined)      document.getElementById('sortBy').value=fc.sortBy;
       updateSliderLabels();
     }
@@ -1619,7 +1583,6 @@ function setLoading(on){
 
 // ── Init ───────────────────────────────────────────────────────────────────
 updateSliderLabels();
-initDatePicker();
 loadData();
 
 // ── Touch tooltips for histogram bars (mobile) ────────────────────────────
