@@ -83,8 +83,9 @@
     .grade-slider-row { position: static; pointer-events: auto; margin-bottom: 10px; }
     .grade-inline-label { display: flex; }
     .grade-range-wrap input[type=range] {
-      position: static; pointer-events: auto;
+      position: static; pointer-events: auto; background: var(--border); z-index: auto;
     }
+    .grade-range-wrap input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
     .grade-range-wrap input[type=range].thumb-top { z-index: auto; }
   }
 
@@ -129,6 +130,19 @@
   .map-label.open .map-toggle-arrow { transform: rotate(180deg); }
   .map-body { display: none; }
   .map-body.open { display: block; margin-top: 8px; }
+  .map-pin-btn {
+    display: inline-block; margin-left: 7px; font-size: 0.8rem;
+    color: var(--sea); cursor: pointer; opacity: 0.7; vertical-align: middle;
+    line-height: 1; user-select: none;
+  }
+  .map-pin-btn:hover { opacity: 1; }
+  @keyframes mapPulse {
+    0%   { transform: scale(1) translateY(0); }
+    30%  { transform: scale(1.5) translateY(-6px); }
+    60%  { transform: scale(1.2) translateY(-3px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  .map-marker-pulse { animation: mapPulse 0.5s ease-out 3; }
   #cragsMap { height: 340px; border-radius: var(--radius); border: 1px solid var(--border); }
 
   /* ── Results ── */
@@ -581,7 +595,7 @@ let allCrags = [], filteredCrags = [], expandedCrags = new Set();
 let allSectors = [], filteredSectors = [];
 let currentMode = 'crags';
 let primaryGrade = 'vl';
-let _leafletMap = null, _mapMarkers = [];
+let _leafletMap = null, _mapMarkers = [], _mapMarkersByKey = {};
 const _today = new Date();
 let currentDate = { year: _today.getFullYear(), month: _today.getMonth()+1, day: _today.getDate() };
 let busynessWindowStart = ''; // ISO date string from meta.busyness_window_start
@@ -981,9 +995,10 @@ function sectorCard(sector, f) {
     ? `<span class="badge badge-aspect">faces ${sector.aspect_raw}</span>` : '';
   const walkInBadge = sector.walk_in != null
     ? `<span class="badge badge-walkin" title="Walk-in time">🥾 ${sector.walk_in}min</span>` : '';
-  const sectorNameHtml = sector.ukc_url
+  const sectorNameHtml = (sector.ukc_url
     ? `<a href="${sector.ukc_url}" target="_blank" rel="noopener">${sector.displayName}</a>`
-    : sector.displayName;
+    : sector.displayName)
+    + (sector.lat && sector.lng ? `<span class="map-pin-btn" onclick="focusOnMap('${cardKey}')" title="Show on map">📍</span>` : '');
 
   return `<div class="crag-card" id="crag-${cardKey}">
     <div class="crag-header">
@@ -993,7 +1008,7 @@ function sectorCard(sector, f) {
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
           <span class="badge badge-stars">${starsStr}</span>
-          ${aspectBadge}
+
           ${walkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
         </div>
@@ -1132,9 +1147,10 @@ function cragCard(crag, f) {
   const avgWalkIn = walkIns.length ? Math.round(walkIns.reduce((a,b)=>a+b,0)/walkIns.length) : null;
   const cragWalkInBadge = avgWalkIn != null
     ? `<span class="badge badge-walkin" title="Average walk-in time across sectors">🥾 ${avgWalkIn}min</span>` : '';
-  const cragNameHtml = crag.ukc_url
+  const cragNameHtml = (crag.ukc_url
     ? `<a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a>`
-    : crag.name;
+    : crag.name)
+    + (crag.lat && crag.lng ? `<span class="map-pin-btn" onclick="focusOnMap('${cragKey}')" title="Show on map">📍</span>` : '');
 
   return `<div class="crag-card" id="crag-${cragKey}">
     <div class="crag-header">
@@ -1144,7 +1160,7 @@ function cragCard(crag, f) {
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
           <span class="badge badge-stars">${starsStr}</span>
-          ${aspectBadge}
+
           ${cragWalkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
         </div>
@@ -1390,6 +1406,7 @@ function updateMap() {
   if (!_leafletMap) return;
   _mapMarkers.forEach(m => m.remove());
   _mapMarkers = [];
+  _mapMarkersByKey = {};
 
   if (currentMode === 'crags') {
     for (const crag of filteredCrags) {
@@ -1400,6 +1417,7 @@ function updateMap() {
         .bindTooltip(crag.name, {direction: 'top', offset: [0, -28]})
         .on('click', () => openCragFromMap(key));
       _mapMarkers.push(m);
+      _mapMarkersByKey[key] = m;
     }
   } else {
     const seen = new Set();
@@ -1413,12 +1431,37 @@ function updateMap() {
         .bindTooltip(sector.cragName, {direction: 'top', offset: [0, -28]})
         .on('click', () => openCragFromMap(cardKey));
       _mapMarkers.push(m);
+      _mapMarkersByKey[cardKey] = m;
     }
   }
 
   if (_mapMarkers.length > 0) {
     _leafletMap.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.15));
   }
+}
+
+function focusOnMap(key) {
+  const mapLabel = document.querySelector('.map-label');
+  const mapBody  = document.getElementById('mapBody');
+  if (!mapBody.classList.contains('open')) {
+    toggleMapBar(mapLabel);
+  }
+  const mapBar = document.querySelector('.map-bar');
+  mapBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => {
+    const marker = _mapMarkersByKey[key];
+    if (!marker) return;
+    _leafletMap.invalidateSize();
+    _leafletMap.setView(marker.getLatLng(), Math.max(_leafletMap.getZoom(), 14), { animate: true });
+    marker.openTooltip();
+    const el = marker.getElement();
+    if (el) {
+      el.classList.remove('map-marker-pulse');
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add('map-marker-pulse');
+      setTimeout(() => el.classList.remove('map-marker-pulse'), 1500);
+    }
+  }, 350);
 }
 
 // ── AI query ──────────────────────────────────────────────────────────────
