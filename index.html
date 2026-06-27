@@ -66,12 +66,32 @@
   }
 
   .grade-range-wrap { position: relative; height: 30px; }
-  .grade-range-wrap input[type=range] { position: absolute; top: 13px; pointer-events: none; z-index: 1; background: transparent; }
+  .grade-slider-row { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; }
+  .grade-inline-label { display: none; }
+  .grade-range-wrap input[type=range] { position: absolute; top: 13px; pointer-events: none; z-index: 1; background: transparent; width: 100%; }
   .grade-range-wrap input[type=range]::-webkit-slider-runnable-track { background: transparent; }
   .grade-range-wrap input[type=range].thumb-top { z-index: 3; }
   .grade-range-wrap input[type=range]::-webkit-slider-thumb { pointer-events: all; }
   #gradeTrackBg { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; left: 7px; right: 7px; background: var(--border); border-radius: 2px; pointer-events: none; z-index: 0; }
   #gradeTrack { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: var(--sea); border-radius: 2px; pointer-events: none; z-index: 2; }
+
+  .grade-ext-labels { display: block; }
+  @media (pointer: coarse) {
+    .grade-ext-labels { display: none; }
+    .grade-range-wrap { height: auto; }
+    #gradeTrackBg, #gradeTrack { display: none; }
+    .grade-slider-row { position: static; pointer-events: auto; margin-bottom: 10px; }
+    .grade-inline-label { display: flex; }
+    .grade-range-wrap input[type=range] {
+      position: static; pointer-events: auto; background: var(--border);
+      height: 6px; width: 100%;
+    }
+    .grade-range-wrap input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
+    .grade-range-wrap input[type=range].thumb-top { z-index: auto; }
+    .grade-range-wrap input[type=range]::-webkit-slider-thumb {
+      width: 30px; height: 30px;
+    }
+  }
 
   .check-group { display: flex; flex-direction: column; gap: 7px; }
   .check-label { display: flex; align-items: center; gap: 7px; font-size: 0.81rem; cursor: pointer; }
@@ -394,13 +414,21 @@
       </div>
     </div>
     <div class="filter-group">
-      <div class="filter-label">Min <span id="gradeMinLabel">3a</span></div>
-      <div class="filter-label">Max <span id="gradeMaxLabel">9a</span></div>
+      <div class="grade-ext-labels">
+        <div class="filter-label">Min <span id="gradeMinLabel">3a</span></div>
+        <div class="filter-label">Max <span id="gradeMaxLabel">9a</span></div>
+      </div>
       <div class="grade-range-wrap">
         <div id="gradeTrackBg"></div>
         <div id="gradeTrack"></div>
-        <input type="range" id="gradeMin" min="0" max="32" value="0">
-        <input type="range" id="gradeMax" min="0" max="32" value="32">
+        <div class="grade-slider-row">
+          <div class="filter-label grade-inline-label">Min <span id="gradeMinLabelM">3a</span></div>
+          <input type="range" id="gradeMin" min="0" max="32" value="0">
+        </div>
+        <div class="grade-slider-row">
+          <div class="filter-label grade-inline-label">Max <span id="gradeMaxLabelM">9a</span></div>
+          <input type="range" id="gradeMax" min="0" max="32" value="32">
+        </div>
       </div>
     </div>
 
@@ -434,6 +462,19 @@
         <option value="17">17:00</option>
         <option value="18">18:00</option>
         <option value="19">19:00</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">Max walk-in</div>
+      <select id="maxWalkIn">
+        <option value="any">Any</option>
+        <option value="5">≤ 5 min</option>
+        <option value="10">≤ 10 min</option>
+        <option value="20">≤ 20 min</option>
+        <option value="30">≤ 30 min</option>
+        <option value="45">≤ 45 min</option>
+        <option value="60">60+ min</option>
       </select>
     </div>
 
@@ -669,6 +710,7 @@ function getFilters() {
     minRoutes:   parseInt(document.getElementById('minRoutes').value),
     minStars:    parseFloat(document.getElementById('minStars').value),
     shadeAt:     document.getElementById('shadeAt').value === 'any' ? null : parseInt(document.getElementById('shadeAt').value),
+    maxWalkIn:   document.getElementById('maxWalkIn').value === 'any' ? null : parseInt(document.getElementById('maxWalkIn').value),
     boltSafe:    document.getElementById('boltSafe').checked,
     boltRecent:  document.getElementById('boltRecent').checked,
     boltUnknown: document.getElementById('boltUnknown').checked,
@@ -691,7 +733,7 @@ function effectiveGradeIdx(r) {
     const vlIdx = GRADE_IDX[r.vl_grade];
     if (vlIdx !== undefined) return vlIdx;
   }
-  return r.grade_sort ?? GRADE_IDX[r.grade] ?? 99;
+  return GRADE_IDX[r.grade] ?? 99;
 }
 
 function routesInRange(crag, minIdx, maxIdx) {
@@ -744,7 +786,7 @@ function buildSectors(crags) {
   return Array.from(map.values()).map(s => {
     const rs = s.routes;
     s.route_count = rs.length;
-    const gis = rs.map(r => r.grade_sort ?? GRADE_IDX[r.grade] ?? 99).filter(g => g < 99);
+    const gis = rs.map(r => GRADE_IDX[r.grade] ?? 99).filter(g => g < 99);
     s.grade_min = gis.length ? GRADES[Math.min(...gis)] : '?';
     s.grade_max = gis.length ? GRADES[Math.max(...gis)] : '?';
     const srs = rs.filter(r => r.star_rating > 0).map(r => r.star_rating);
@@ -797,6 +839,10 @@ function applyFilters(ov={}) {
         if (slot && slot.fraction > 0.5) return false;
       }
     }
+    if (f.maxWalkIn !== null) {
+      const walkIns = Object.values(crag.sectors_meta || {}).map(s => s.walk_in).filter(v => v != null);
+      if (!walkIns.length || Math.min(...walkIns) > f.maxWalkIn) return false;
+    }
     return true;
   });
 
@@ -843,6 +889,9 @@ function applyFiltersSectors(f) {
         if (slot && slot.fraction > 0.5) return false;
       }
     }
+    if (f.maxWalkIn !== null) {
+      if (s.walk_in == null || s.walk_in > f.maxWalkIn) return false;
+    }
     return true;
   });
 
@@ -873,6 +922,7 @@ function resetFilters() {
   document.getElementById('minRoutes').value = 1;
   document.getElementById('minStars').value = 0;
   document.getElementById('shadeAt').value = 'any';
+  document.getElementById('maxWalkIn').value = 'any';
   document.getElementById('boltSafe').checked = true;
   document.getElementById('boltRecent').checked = true;
   document.getElementById('boltUnknown').checked = true;
@@ -1270,8 +1320,11 @@ function toggleRoutes(id) {
 function updateSliderLabels() {
   const a=parseInt(document.getElementById('gradeMin').value);
   const b=parseInt(document.getElementById('gradeMax').value);
-  document.getElementById('gradeMinLabel').textContent = GRADES[Math.min(a,b)];
-  document.getElementById('gradeMaxLabel').textContent = GRADES[Math.max(a,b)];
+  const minGrade = GRADES[Math.min(a,b)], maxGrade = GRADES[Math.max(a,b)];
+  document.getElementById('gradeMinLabel').textContent = minGrade;
+  document.getElementById('gradeMaxLabel').textContent = maxGrade;
+  document.getElementById('gradeMinLabelM').textContent = minGrade;
+  document.getElementById('gradeMaxLabelM').textContent = maxGrade;
   document.getElementById('minRoutesLabel').textContent = document.getElementById('minRoutes').value;
   const sv=parseFloat(document.getElementById('minStars').value);
   document.getElementById('minStarsLabel').textContent = sv===0?'Any':sv.toFixed(1)+'★';
@@ -1317,6 +1370,7 @@ let _applyDebounce;
 });
 
 document.getElementById('shadeAt').addEventListener('change', () => { applyFilters(); });
+document.getElementById('maxWalkIn').addEventListener('change', () => { applyFilters(); });
 
 // ── AI bar toggle ─────────────────────────────────────────────────────────
 function toggleAiBar(label) {
