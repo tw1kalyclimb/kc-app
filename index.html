@@ -688,20 +688,26 @@ function routesInRange(crag, minIdx, maxIdx) {
 }
 
 function computeDynBusyness(crags, minIdx, maxIdx) {
+  const cut12m = (() => { const d = new Date(); d.setFullYear(d.getFullYear()-1); return d.toISOString().slice(0,10); })();
   const hasRawLogs = crags.some(c => (c.routes||[]).some(r => (r.logs||[]).length > 0));
   if (!hasRawLogs) {
-    crags.forEach(c => { c._dynBusyness = c.normalised_busyness ?? 0; });
+    crags.forEach(c => { c._dynBusyness = c.normalised_busyness ?? 0; c._ascentsPerRoute = null; });
     return;
   }
   const raws = crags.map(crag => {
     const inRange = routesInRange(crag, minIdx, maxIdx);
-    if (!inRange.length) return 0;
+    if (!inRange.length) return { busy: 0, apr: null };
     const recentLogs = inRange.reduce((sum, r) =>
       sum + (r.logs||[]).filter(d => !busynessWindowStart || d >= busynessWindowStart).length, 0);
-    return recentLogs / inRange.length;
+    const logs12m = inRange.reduce((sum, r) =>
+      sum + (r.logs||[]).filter(d => d >= cut12m).length, 0);
+    return { busy: recentLogs / inRange.length, apr: logs12m / inRange.length };
   });
-  const maxRaw = Math.max(...raws, 1e-9);
-  crags.forEach((c, i) => { c._dynBusyness = raws[i] / maxRaw; });
+  const maxRaw = Math.max(...raws.map(r => r.busy), 1e-9);
+  crags.forEach((c, i) => {
+    c._dynBusyness = raws[i].busy / maxRaw;
+    c._ascentsPerRoute = raws[i].apr;
+  });
 }
 
 function buildSectors(crags) {
@@ -996,6 +1002,9 @@ function sectorCard(sector, f) {
     <div class="crag-stats">
       <div class="stat"><span class="stat-val">${sector.route_count}</span><span class="stat-label">Routes</span></div>
       <div class="stat"><span class="stat-val">${sector.recent_log_count}</span><span class="stat-label">Logs (12mo)</span></div>
+      <div class="stat" title="Ascents per route in last 12 months (filtered grade range)">
+        <span class="stat-val">${sector._ascentsPerRoute != null ? sector._ascentsPerRoute.toFixed(1) : '?'}</span><span class="stat-label">Asc/route</span>
+      </div>
       <div class="stat" title="Recent logs per route in selected grade range, normalised">
         <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
       </div>
@@ -1150,6 +1159,10 @@ function cragCard(crag, f) {
       <div class="stat">
         <span class="stat-val">${crag.recent_log_count}</span>
         <span class="stat-label">Logs (12mo)</span>
+      </div>
+      <div class="stat" title="Ascents per route in last 12 months (filtered grade range)">
+        <span class="stat-val">${crag._ascentsPerRoute != null ? crag._ascentsPerRoute.toFixed(1) : '?'}</span>
+        <span class="stat-label">Asc/route</span>
       </div>
       <div class="stat" title="Recent logs per route in selected grade range, normalised">
         <span class="stat-val">${normBusy}</span>
