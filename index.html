@@ -1112,9 +1112,12 @@ function cragCard(crag, f) {
 
   const rows = sectorOrder.map(s => {
     const sectorRows = bySector[s].map(makeRow).join('');
-    const sWalkIn = smeta[s]?.walk_in;
+    const sm = smeta[s] || {};
+    const sWalkIn = sm.walk_in;
     const walkInStr = sWalkIn != null ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#d4e8d4;color:#2e6b2e;font-size:0.72em;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:middle">🥾 ${sWalkIn}min</span>` : '';
-    const header = s ? `<tr class="sector-header-row"><td colspan="5">${s}${walkInStr}</td></tr>` : '';
+    const shadeDesc = buildSunSchedule(sm.sun_start, sm.sun_end)?.shadeDesc;
+    const shadeStr = shadeDesc ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#e8f0fe;color:#1a56db;font-size:0.72em;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:middle">☀ ${shadeDesc}</span>` : '';
+    const header = s ? `<tr class="sector-header-row"><td colspan="5">${s}${walkInStr}${shadeStr}</td></tr>` : '';
     return header + sectorRows;
   }).join('');
 

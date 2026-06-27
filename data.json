@@ -4,7 +4,7 @@
     "scraped_at": "2026-06-26T17:06:07.217906+00:00",
     "vl_scraped_at": "2026-06-27T12:44:13.154790+00:00",
     "rebolt_scraped_at": "2026-06-14T14:17:34.295575+00:00",
-    "processed_at": "2026-06-27T15:02:21.937338+00:00",
+    "processed_at": "2026-06-27T15:10:01.884531+00:00",
     "crag_count": 108,
     "route_count": 5123,
     "log_count": 660915,
@@ -178191,7 +178191,7 @@
       "sectors_meta": {
         "Elephant Slide": {
           "sun_start": 12,
-          "sun_end": 0,
+          "sun_end": 24,
           "walk_in": 15
         }
       }
@@ -734607,8 +734607,8 @@
           "walk_in": 20
         },
         "The Beach far right": {
-          "sun_start": 0,
-          "sun_end": 0,
+          "sun_start": 23,
+          "sun_end": 24,
           "walk_in": 20
         },
         "The Beach main": {
