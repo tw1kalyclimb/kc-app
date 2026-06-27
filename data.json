@@ -2,9 +2,9 @@
   "meta": {
     "primary_source": "vl",
     "scraped_at": "2026-06-26T17:06:07.217906+00:00",
-    "vl_scraped_at": "2026-06-27T12:27:25.500799+00:00",
+    "vl_scraped_at": "2026-06-27T12:44:13.154790+00:00",
     "rebolt_scraped_at": "2026-06-14T14:17:34.295575+00:00",
-    "processed_at": "2026-06-27T12:31:12.299957+00:00",
+    "processed_at": "2026-06-27T15:02:21.937338+00:00",
     "crag_count": 108,
     "route_count": 5123,
     "log_count": 660915,
@@ -22107,9 +22107,9 @@
       "lng": 26.943964,
       "sectors_meta": {
         "Afternoon": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -22951,19 +22951,19 @@
       "lng": 26.982562,
       "sectors_meta": {
         "La Vague": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "La Vogue right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Twin Caves": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -24117,9 +24117,9 @@
       "lng": 26.94251,
       "sectors_meta": {
         "Apollo": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 2
         }
       }
     },
@@ -60797,39 +60797,34 @@
       "lng": 26.972134,
       "sectors_meta": {
         "Amphiteatre": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Fire Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
-        },
-        "Gammos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 6
         },
         "Holiday": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Infrared Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Katharina": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11.5,
+          "sun_end": 24,
+          "walk_in": 6
         },
         "Rock Round & Vertical Sailing": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -67720,19 +67715,19 @@
       "lng": 26.977558,
       "sectors_meta": {
         "Little Verdon": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Ovoland": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "Piccalia": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -118813,64 +118808,59 @@
       "lng": 26.974637,
       "sectors_meta": {
         "Alani Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12.5,
+          "walk_in": 5
         },
         "Arginonta Valley Right of Middle": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12.5,
+          "walk_in": 5
         },
         "Black Buddha": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Comic Tree": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 17,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Diagoras Cave & Ronin Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13.5,
+          "walk_in": 5
         },
         "Gamos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 8
         },
         "Mona Lisa": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12.5,
+          "walk_in": 5
         },
         "Rock n Roll Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 5
         },
         "Rock Tragos Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 5
         },
         "Ruby": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
-        },
-        "Una faccia una razza ": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 8
         },
         "White Spirit": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 7
         }
       }
     },
@@ -152978,44 +152968,39 @@
       "lng": 26.965225,
       "sectors_meta": {
         "Arhi left lower": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Arhi left upper": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10.5,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Balcony Helvetia": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Chäpi": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
-        },
-        "Dalle a Patouch": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Grey Slab": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Troulos inside": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Troulos outer wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -153317,9 +153302,9 @@
       "lng": 26.931302,
       "sectors_meta": {
         "Austrians": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -159375,14 +159360,14 @@
       "lng": 26.963774,
       "sectors_meta": {
         "Dalle á Patouche": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 16
         },
         "Fotisi Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 16
         }
       }
     },
@@ -159590,7 +159575,7 @@
       "grade_min": "4a",
       "grade_max": "7c+",
       "avg_star_rating": 1.98,
-      "avg_vl_star_rating": 2.15,
+      "avg_vl_star_rating": 2.08,
       "grades_histogram": {
         "4a": 1,
         "4b": 1,
@@ -160134,7 +160119,7 @@
           "grade_sort": 6,
           "vl_grade": "5a",
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 1,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/sto_kalo-23625",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-main-wall/routes/sto-kalo",
@@ -161147,7 +161132,7 @@
           "grade_sort": 8,
           "vl_grade": null,
           "star_rating": 0,
-          "vl_stars": null,
+          "vl_stars": 1,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/thyme_honey-23632",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-upper-wall/routes/thyme-honey",
@@ -161287,7 +161272,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 1,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/sleepwalker-176926",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-main-wall/routes/sleepwalker",
@@ -161884,7 +161869,7 @@
           "grade_sort": 11,
           "vl_grade": null,
           "star_rating": 0,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/scare_fesse-780302",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/sevasti/routes/scare-fesse",
@@ -161961,7 +161946,7 @@
           "grade_sort": 11,
           "vl_grade": null,
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/white_snake-23629",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-upper-wall/routes/white-snake",
@@ -163030,7 +163015,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/sevasti/routes/ultime-atome",
@@ -163614,7 +163599,7 @@
           "grade_sort": 13,
           "vl_grade": "6b",
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 1,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/zicke-136094",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-upper-wall/routes/zicke",
@@ -164188,7 +164173,7 @@
           "grade_sort": 14,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/score_but-748782",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/sevasti/routes/score-but-cc2xm",
@@ -164683,7 +164668,7 @@
           "grade_sort": 16,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/red_monkey-56875",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-upper-wall/routes/red-monkey",
@@ -165275,7 +165260,7 @@
           "grade_sort": 18,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/sascha_on_the_road-23622",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-main-wall/routes/sascha-on-the-road",
@@ -165398,7 +165383,7 @@
           "grade_sort": 19,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/galatiani_area-1766/rifugio_bozano-368986",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/cave/sectors/cave-far-left-wall-visbl/routes/rifugio-bozano",
@@ -165884,9 +165869,9 @@
       "lng": 26.903714,
       "sectors_meta": {
         "Crescendo": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 60
         }
       }
     },
@@ -165933,9 +165918,9 @@
       "lng": 27.022756,
       "sectors_meta": {
         "Cross": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 17,
+          "walk_in": 15
         }
       }
     },
@@ -166283,9 +166268,9 @@
       "lng": 26.9002,
       "sectors_meta": {
         "Crystal Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 35
         }
       }
     },
@@ -167958,9 +167943,9 @@
       "lng": 26.963241,
       "sectors_meta": {
         "Dodoni": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -175095,9 +175080,9 @@
       "lng": 26.941275,
       "sectors_meta": {
         "Dolphin Bay": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 10
         }
       }
     },
@@ -176816,19 +176801,19 @@
       "lng": 26.986288,
       "sectors_meta": {
         "E.T. Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 23,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Koukouvas": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 20
         },
         "Main Buttress": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12.5,
+          "walk_in": 20
         }
       }
     },
@@ -178205,9 +178190,9 @@
       "lng": 26.957569,
       "sectors_meta": {
         "Elephant Slide": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 0,
+          "walk_in": 15
         }
       }
     },
@@ -184941,14 +184926,14 @@
       "lng": 26.909649,
       "sectors_meta": {
         "Eros": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 15
         },
         "Hocki Klocki": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 23,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -185817,14 +185802,14 @@
       "lng": 26.976082,
       "sectors_meta": {
         "Exo Syki": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 35
         },
         "Kalidonis": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 35
         }
       }
     },
@@ -189443,19 +189428,19 @@
       "lng": 26.961197,
       "sectors_meta": {
         "Black Forest": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Galatiani Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Reservoir Dogs": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -196806,24 +196791,24 @@
       "lng": null,
       "sectors_meta": {
         "Feminissure": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 10
         },
         "Gamos Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 8
         },
         "Ruby": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 7
         },
         "White Spirit": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 10,
+          "walk_in": 8
         }
       }
     },
@@ -197377,9 +197362,9 @@
       "lng": 26.972088,
       "sectors_meta": {
         "Gary’s": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11.5,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -197393,7 +197378,7 @@
       "grade_min": "4a",
       "grade_max": "8a+",
       "avg_star_rating": 2.1,
-      "avg_vl_star_rating": 2.2,
+      "avg_vl_star_rating": 2.21,
       "grades_histogram": {
         "4a": 1,
         "5b": 5,
@@ -197876,7 +197861,7 @@
           "grade_sort": 7,
           "vl_grade": "5b",
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/trip-359803",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/gerakios-main/routes/trip",
@@ -198345,7 +198330,7 @@
           "grade_sort": 8,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/unknown-sector/routes/shirli-pipi",
@@ -200014,7 +199999,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/reader-354706",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/gerakios-main/routes/reader",
@@ -200512,7 +200497,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": 0,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/tally_ho-485100",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/spitfire/routes/tally-ho",
@@ -201851,7 +201836,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/under-the-rainbow/routes/ossa-female",
@@ -201869,7 +201854,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/tatoo-284045",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/upper-cave/routes/tatoo",
@@ -201978,7 +201963,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/yamas-yclsl/routes/un-des-100-ext",
@@ -201999,7 +201984,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/rainbow-wall/routes/utopia-rainbow",
@@ -202384,7 +202369,7 @@
           "grade_sort": 13,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/titis_blues-383823",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/gerakios-main/routes/titis-blues",
@@ -203511,7 +203496,7 @@
           "grade_sort": 14,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/gerakios-main/routes/small-prize",
@@ -203532,7 +203517,7 @@
           "grade_sort": 14,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/myrties_area-19905/twou_dabal-640963",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/gerakios/sectors/yamas-yclsl/routes/twou-d-abal",
@@ -205133,39 +205118,39 @@
       "lng": 26.938049,
       "sectors_meta": {
         "Blue Balcony": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "Gerakios Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Rainbow Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 40
         },
         "Spitfire": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Under the Rainbow": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Upper Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Yamas": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 35
         }
       }
     },
@@ -241394,9 +241379,9 @@
       "lng": 26.908567,
       "sectors_meta": {
         "Glaros": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 17,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -265241,9 +265226,9 @@
       "lng": 26.943804,
       "sectors_meta": {
         "Grande Grotta": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -276925,19 +276910,19 @@
       "lng": 26.957673,
       "sectors_meta": {
         "Griffig far left & left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 20
         },
         "Griffig main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 17,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Griffig right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 17,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -277207,9 +277192,9 @@
       "lng": 26.96972,
       "sectors_meta": {
         "Haute Gorge": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 60
         }
       }
     },
@@ -280589,9 +280574,9 @@
       "lng": 26.95956,
       "sectors_meta": {
         "Highlands": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 15
         }
       }
     },
@@ -281179,9 +281164,9 @@
       "lng": 26.939069,
       "sectors_meta": {
         "Hump Pitse": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11.5,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -295000,34 +294985,34 @@
       "lng": 26.944507,
       "sectors_meta": {
         "Afghan Corridor": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Climber`s Nest": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Dolonas Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Emilio": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Iliada Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Muses": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -295507,13 +295492,13 @@
           ]
         }
       ],
-      "lat": null,
-      "lng": null,
+      "lat": 37.042513,
+      "lng": 26.972497,
       "sectors_meta": {
         "Ilias Pillar": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 9,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -295789,9 +295774,9 @@
       "lng": 26.905265,
       "sectors_meta": {
         "Inspiration Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 60
         }
       }
     },
@@ -304410,24 +304395,24 @@
       "lng": 26.909872,
       "sectors_meta": {
         "Far Right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 5
         },
         "Left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 5
         },
         "Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 5
         },
         "Rigth": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 5
         }
       }
     },
@@ -312699,19 +312684,19 @@
       "lng": 26.943328,
       "sectors_meta": {
         "Ivory Tower": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 15.5,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Seven Dwarfs": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Stankill": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -320591,24 +320576,24 @@
       "lng": 26.984078,
       "sectors_meta": {
         "Animal Farm": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 5
         },
         "Arena": {
           "sun_start": null,
           "sun_end": null,
-          "walk_in": null
+          "walk_in": 3
         },
         "Far left slab": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 17,
+          "walk_in": 5
         },
         "Right slabs": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 18,
+          "walk_in": 10
         }
       }
     },
@@ -322478,9 +322463,9 @@
       "lng": 26.990341,
       "sectors_meta": {
         "Julian": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -325901,9 +325886,9 @@
       "lng": 26.948573,
       "sectors_meta": {
         "Jurassic Park": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 45
         }
       }
     },
@@ -326659,9 +326644,9 @@
       "lng": 26.978567,
       "sectors_meta": {
         "Jägerwand": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -337707,19 +337692,19 @@
       "lng": 26.94275,
       "sectors_meta": {
         "Left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Middle": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -338092,9 +338077,9 @@
       "lng": 26.990178,
       "sectors_meta": {
         "Kardama": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 15
         }
       }
     },
@@ -350884,24 +350869,24 @@
       "lng": 26.93802,
       "sectors_meta": {
         "Kasteli Back Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 10
         },
         "Kasteli Easy Slab": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Kasteli Main Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Kasteli North Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 8
         }
       }
     },
@@ -356763,9 +356748,9 @@
       "lng": 26.920241,
       "sectors_meta": {
         "Kefala": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 18,
+          "walk_in": 20
         }
       }
     },
@@ -357273,9 +357258,9 @@
       "lng": 26.972535,
       "sectors_meta": {
         "Kryptos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 75
         }
       }
     },
@@ -364475,14 +364460,14 @@
       "lng": 26.905073,
       "sectors_meta": {
         "Lambda left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Lambda right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -365567,9 +365552,9 @@
       "lng": 26.944508,
       "sectors_meta": {
         "Little Italy": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -365699,9 +365684,9 @@
       "lng": 26.908852,
       "sectors_meta": {
         "The Magic Roundabout": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -373512,14 +373497,14 @@
       "lng": 26.958205,
       "sectors_meta": {
         "Milianos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Milianos Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13.5,
+          "walk_in": 20
         }
       }
     },
@@ -376878,9 +376863,9 @@
       "lng": 26.913152,
       "sectors_meta": {
         "Miltiadis": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 10
         }
       }
     },
@@ -378158,9 +378143,9 @@
       "lng": 26.926236,
       "sectors_meta": {
         "Monastery": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 30
         }
       }
     },
@@ -383399,19 +383384,19 @@
       "lng": 26.943927,
       "sectors_meta": {
         "Helios Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 12
         },
         "Inshallah": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 5
         },
         "Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 9
         }
       }
     },
@@ -398962,39 +398947,39 @@
       "lng": 26.962796,
       "sectors_meta": {
         "Almodòvar": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Eagle Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 45
         },
         "Indian's Face": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Magic Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "Nirvana": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Noufaro grey slab & left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 10
         },
         "Noufaro main & right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 10
         }
       }
     },
@@ -453977,39 +453962,39 @@
       "lng": 26.944803,
       "sectors_meta": {
         "Atena Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Feta Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Imia Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 15.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Marci Marc Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 15,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "On the Verge": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 7
         },
         "Orion Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Sirene Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 8
         }
       }
     },
@@ -462297,24 +462282,24 @@
       "lng": 26.947824,
       "sectors_meta": {
         "Ocean Dream - left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Ocean Dream Multipitches, Slab": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Ocean Dream -  Space Terrace, Nemo": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 35
         },
         "Olympic Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 35
         }
       }
     },
@@ -495727,19 +495712,19 @@
       "lng": 26.943901,
       "sectors_meta": {
         "Left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Middle": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -502660,14 +502645,14 @@
       "lng": 26.908149,
       "sectors_meta": {
         "Pescatore Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 15
         },
         "Zoidis": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 15
         }
       }
     },
@@ -503006,9 +502991,9 @@
       "lng": 26.9437,
       "sectors_meta": {
         "Peter": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 12
         }
       }
     },
@@ -507449,29 +507434,24 @@
       "lng": 27.000721,
       "sectors_meta": {
         "Eora Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 15,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Lemon Crumble Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
-        },
-        "new sector": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Peanut Wall & Great Esacape": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Valhalla": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -507485,7 +507465,7 @@
       "grade_min": "4b",
       "grade_max": "8b",
       "avg_star_rating": 2.24,
-      "avg_vl_star_rating": 2.42,
+      "avg_vl_star_rating": 2.45,
       "grades_histogram": {
         "4b": 2,
         "4c": 3,
@@ -510711,7 +510691,7 @@
           "grade_sort": 8,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/poets_corner-156085",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/poets-corner",
@@ -516347,7 +516327,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/propolis-17669",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/coeur-d-armeos-03hn8/routes/propolis",
@@ -516741,7 +516721,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/quando_tramonta_il_sol-17674",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/quando-tramonta-il-sol",
@@ -519008,7 +518988,7 @@
           "grade_sort": 10,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/unknown-sector-bdbaf/routes/via-alp",
@@ -523154,7 +523134,7 @@
           "grade_sort": 11,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/styx-17677",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/styx",
@@ -529587,7 +529567,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/pomel-direct",
@@ -529987,7 +529967,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/coeur-d-armeos-03hn8/routes/un-culte-41131",
@@ -533914,7 +533894,7 @@
           "grade_sort": 13,
           "vl_grade": "6b",
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 4,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/kavafis-17671",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/kavafis",
@@ -534113,7 +534093,7 @@
           "grade_sort": 13,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/klania-630237",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/meltemi/routes/klania",
@@ -534145,7 +534125,7 @@
           "grade_sort": 13,
           "vl_grade": "6b",
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/la_mouette_genereuse-175949",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/zeus/routes/la-mouette-genereuse",
@@ -541639,7 +541619,7 @@
           "grade_sort": 15,
           "vl_grade": null,
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/la_mer_et_le_vent-550852",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/iannis/routes/la-mer-et-le-vent",
@@ -542151,7 +542131,7 @@
           "grade_sort": 15,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/solomos-17680",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/solomos",
@@ -543512,7 +543492,7 @@
           "grade_sort": 16,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/lapis_lazuli-644099",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/meltemi/routes/lapis-lazuli",
@@ -544945,7 +544925,7 @@
           "grade_sort": 16,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/pounenti-240528",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/meltemi/routes/pounenti-uq1q2",
@@ -544977,7 +544957,7 @@
           "grade_sort": 16,
           "vl_grade": "7a+",
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/rolling_stone-503557",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/rolling-stone",
@@ -546311,7 +546291,7 @@
           "grade_sort": 16,
           "vl_grade": "6c+",
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/spaceboy-514140",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/spaceboy",
@@ -546349,7 +546329,7 @@
           "grade_sort": 16,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/poets/routes/starman",
@@ -550038,7 +550018,7 @@
           "grade_sort": 17,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 0,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/summertime_area-1771/unfinished-780322",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/white-shark-mvbv8/routes/unfinished",
@@ -554503,7 +554483,7 @@
           "grade_sort": 20,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/pammy_wammy-655430",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/white-shark-mvbv8/routes/pammy-wammy",
@@ -555617,7 +555597,7 @@
           "grade_sort": 22,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/la_looz-550863",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/iannis/routes/la-looz",
@@ -555932,7 +555912,7 @@
           "grade_sort": 24,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/masouri_area-18415/racomelo-358641",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/poets/sectors/iannis/routes/racomelo",
@@ -556239,39 +556219,39 @@
       "lng": 26.941512,
       "sectors_meta": {
         "Coeur d`Armeos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Iannis": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Meltemi": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 40
         },
         "Poets": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "Poets right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 15
         },
         "White Shark": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Zeus": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -557251,24 +557231,24 @@
       "lng": 26.898366,
       "sectors_meta": {
         "Princess Canyon el capitin": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 24,
+          "walk_in": 40
         },
         "Princess Canyon roco slab": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 24,
+          "walk_in": 40
         },
         "Princess Canyon wave and crystal wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 24,
+          "walk_in": 40
         },
         "Princess Canyon waxy wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 24,
+          "walk_in": 40
         }
       }
     },
@@ -557485,9 +557465,9 @@
       "lng": 26.96491,
       "sectors_meta": {
         "Prophet Elias": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 15
         }
       }
     },
@@ -564330,9 +564310,9 @@
       "lng": 27.133214,
       "sectors_meta": {
         "Pserimos": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -564958,9 +564938,9 @@
       "lng": 26.955095,
       "sectors_meta": {
         "Psili Riza": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 60
         }
       }
     },
@@ -565313,9 +565293,9 @@
       "lng": 26.937898,
       "sectors_meta": {
         "Pyramid": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -565546,9 +565526,9 @@
       "lng": 26.936567,
       "sectors_meta": {
         "Pythari": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11.5,
+          "sun_end": 24,
+          "walk_in": 60
         }
       }
     },
@@ -565984,9 +565964,9 @@
       "lng": 26.97437,
       "sectors_meta": {
         "Red Wine Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 2
         }
       }
     },
@@ -566894,9 +566874,9 @@
       "lng": 27.00532,
       "sectors_meta": {
         "Rockland": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 30
         }
       }
     },
@@ -567181,9 +567161,9 @@
       "lng": 26.98419,
       "sectors_meta": {
         "Saint George": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 10
         }
       }
     },
@@ -569327,24 +569307,24 @@
       "lng": 26.92183,
       "sectors_meta": {
         "Chapel Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "Icare": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "Spiders": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 30
         },
         "View of Chapel": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13.5,
+          "sun_end": 24,
+          "walk_in": 30
         }
       }
     },
@@ -572752,19 +572732,19 @@
       "lng": 26.946733,
       "sectors_meta": {
         "Aegean Sea Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Jungle Book": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "School Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -597840,34 +597820,34 @@
       "lng": 26.967453,
       "sectors_meta": {
         "Apache Gorge main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14,
+          "sun_end": 24,
+          "walk_in": 17
         },
         "Apache Gorge Wall & Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Great Canyon": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 8
         },
         "Pocket Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 5
         },
         "Sea Breeze Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10.5,
+          "sun_end": 24,
+          "walk_in": 5
         },
         "White Wine Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 18,
+          "walk_in": 5
         }
       }
     },
@@ -623243,7 +623223,7 @@
       "grade_min": "4a",
       "grade_max": "8b",
       "avg_star_rating": 2.62,
-      "avg_vl_star_rating": 2.64,
+      "avg_vl_star_rating": 2.65,
       "grades_histogram": {
         "4a": 1,
         "5b+": 1,
@@ -629384,7 +629364,7 @@
           "grade_sort": 18,
           "vl_grade": null,
           "star_rating": 3,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/sikati_area-8187/ou_est_lequipe-93332",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/sikati-cave/sectors/sikati-cave/routes/ou-est-lequipe",
@@ -637707,38 +637687,38 @@
           ]
         }
       ],
-      "lat": null,
-      "lng": null,
+      "lat": 36.985664,
+      "lng": 26.938151,
       "sectors_meta": {
         "Snake Valley": {
           "sun_start": null,
           "sun_end": null,
-          "walk_in": null
+          "walk_in": 18
         },
         "The Canyon": {
           "sun_start": null,
           "sun_end": null,
-          "walk_in": null
+          "walk_in": 18
         },
         "The Goat Pen": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 18
         },
         "The Gym": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 18
         },
         "The Pillar": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 24,
+          "walk_in": 18
         },
         "The Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 18
         }
       }
     },
@@ -638724,9 +638704,9 @@
       "lng": 26.91926,
       "sectors_meta": {
         "Saint George": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 12
         }
       }
     },
@@ -639065,9 +639045,9 @@
       "lng": 26.937086,
       "sectors_meta": {
         "Sophie": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 20
         }
       }
     },
@@ -655896,9 +655876,9 @@
       "lng": 26.945412,
       "sectors_meta": {
         "Spartacus": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 16,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -655912,7 +655892,7 @@
       "grade_min": "4b",
       "grade_max": "8a+",
       "avg_star_rating": 2.39,
-      "avg_vl_star_rating": 2.5,
+      "avg_vl_star_rating": 2.49,
       "grades_histogram": {
         "4b": 1,
         "4c": 2,
@@ -656076,7 +656056,7 @@
           "grade_sort": 2,
           "vl_grade": "5a",
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/spartacus_area-18410/dimarhos-180486",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/spartan-wall/sectors/spartan-wall/routes/dimarhos",
@@ -664319,9 +664299,9 @@
       "lng": 26.944868,
       "sectors_meta": {
         "Spartan Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 14.5,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -665106,9 +665086,9 @@
       "lng": 26.957695,
       "sectors_meta": {
         "Springtime": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 1
         }
       }
     },
@@ -667716,29 +667696,29 @@
       "lng": 26.912769,
       "sectors_meta": {
         "Falcon Kingdom": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 20
         },
         "Purgatory": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 20
         },
         "Stronghold": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 14,
+          "walk_in": 20
         },
         "Tower of Power & Lost World": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 20
         },
         "Underworld": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 20
         }
       }
     },
@@ -668490,14 +668470,14 @@
       "lng": 26.974067,
       "sectors_meta": {
         "Rubbish Dump": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 10
         },
         "Stan Lee": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 15,
+          "walk_in": 10
         }
       }
     },
@@ -671144,9 +671124,9 @@
       "lng": 26.970119,
       "sectors_meta": {
         "Star Wall": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 16,
+          "walk_in": 10
         }
       }
     },
@@ -702344,39 +702324,39 @@
       "lng": 26.955734,
       "sectors_meta": {
         "Big Shadow": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 30
         },
         "Local Freezer": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 12
         },
         "Magoulias": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 15
         },
         "Nikoleta": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 5
         },
         "Springtime": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 2
         },
         "Summertime": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 5
         },
         "Summer Wine": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 11
         }
       }
     },
@@ -702513,9 +702493,9 @@
       "lng": 26.984685,
       "sectors_meta": {
         "Swan Song": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 22
         }
       }
     },
@@ -702529,7 +702509,7 @@
       "grade_min": "4a",
       "grade_max": "8b",
       "avg_star_rating": 1.91,
-      "avg_vl_star_rating": 2.4,
+      "avg_vl_star_rating": 2.39,
       "grades_histogram": {
         "4a": 1,
         "4b": 1,
@@ -713019,7 +712999,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/symplegades_area-1779/neanderthal-175969",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/symplegades/sectors/symplegades-left-back-area/routes/neanderthal",
@@ -713415,7 +713395,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/symplegades_area-1779/octana-23771",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/symplegades/sectors/symplegades-right/routes/octana",
@@ -713568,7 +713548,7 @@
           "grade_sort": 12,
           "vl_grade": null,
           "star_rating": 2,
-          "vl_stars": null,
+          "vl_stars": 2,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/symplegades_area-1779/oily_body-740447",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/symplegades/sectors/ourania-cave/routes/oily-body",
@@ -716909,7 +716889,7 @@
           "grade_sort": 14,
           "vl_grade": null,
           "star_rating": 1,
-          "vl_stars": null,
+          "vl_stars": 1,
           "ukc_url": "https://www.ukclimbing.com/logbook/crags/symplegades_area-1779/obolus-109208",
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/symplegades/sectors/symplegades-left-back-area/routes/obolus",
@@ -720695,7 +720675,7 @@
           "grade_sort": 24,
           "vl_grade": null,
           "star_rating": null,
-          "vl_stars": null,
+          "vl_stars": 3,
           "ukc_url": null,
           "user_style": null,
           "vl_url": "https://www.8a.nu/crags/sportclimbing/greece/symplegades/sectors/ourania-cave/routes/oily-body-ext",
@@ -720882,29 +720862,29 @@
       "lng": 26.940179,
       "sectors_meta": {
         "Mystery": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 18
         },
         "Ourania Cave": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 15.5,
+          "sun_end": 24,
+          "walk_in": 18
         },
         "Symplegades - entrance left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 18
         },
         "Symplegades - left & back area": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 13,
+          "sun_end": 24,
+          "walk_in": 18
         },
         "Symplegades - right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 135,
+          "walk_in": 18
         }
       }
     },
@@ -721175,9 +721155,9 @@
       "lng": 26.916086,
       "sectors_meta": {
         "North Face": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12,
+          "sun_end": 24,
+          "walk_in": 65
         }
       }
     },
@@ -725661,9 +725641,9 @@
       "lng": 26.902368,
       "sectors_meta": {
         "Southface - Multi-Pitch": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 30
         }
       }
     },
@@ -736095,24 +736075,24 @@
       "lng": 26.916444,
       "sectors_meta": {
         "Barbarossa": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 30
         },
         "For Telendian": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 30
         },
         "Gymnasium": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 30
         },
         "Totem Pole": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 13,
+          "walk_in": 30
         }
       }
     },
@@ -736263,9 +736243,9 @@
       "lng": 26.904655,
       "sectors_meta": {
         "Titan Tower": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 45
         }
       }
     },
@@ -751304,19 +751284,19 @@
       "lng": 26.938173,
       "sectors_meta": {
         "Left": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 20
         },
         "Middle": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 22
         },
         "Right": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -756130,19 +756110,19 @@
       "lng": 26.938769,
       "sectors_meta": {
         "Paradise Garden": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Scali": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 25
         },
         "Vasilissa Main": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 11,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -762333,29 +762313,29 @@
       "lng": 27.027392,
       "sectors_meta": {
         "DWS": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 0
         },
         "Hook": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 0
         },
         "Little Eden": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 12,
+          "walk_in": 50
         },
         "Puerto Escondido": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 10,
+          "sun_end": 24,
+          "walk_in": 0
         },
         "Rina": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 12.5,
+          "sun_end": 24,
+          "walk_in": 25
         }
       }
     },
@@ -762765,9 +762745,9 @@
       "lng": 26.962862,
       "sectors_meta": {
         "Vlychadia": {
-          "sun_start": null,
-          "sun_end": null,
-          "walk_in": null
+          "sun_start": 0,
+          "sun_end": 11,
+          "walk_in": 7
         }
       }
     },
