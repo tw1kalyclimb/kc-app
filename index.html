@@ -354,6 +354,14 @@
   .bolt-recent  { background: var(--recent); }
   .bolt-unknown { background: var(--unknown); }
   .stars-text   { color: var(--sun); letter-spacing: -1px; }
+  .ascent-tick {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    color: #fff; font-size: 0.72em; font-weight: 800;
+    margin-right: 5px; cursor: default; flex-shrink: 0; vertical-align: middle;
+  }
+  .ascent-tick-green  { background: #2a8a3e; }
+  .ascent-tick-orange { background: #c07010; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--mid); }
   .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
@@ -1003,9 +1011,14 @@ function sectorCard(sector, f) {
     const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
       : `<span class="route-grade">${primaryG}</span>`;
+    const tick = r.user_style
+      ? (r.user_style==='Lead O/S'||r.user_style==='Lead rpt'
+          ? `<span class="ascent-tick ascent-tick-green" title="${r.user_style}">✓</span>`
+          : `<span class="ascent-tick ascent-tick-orange" title="${r.user_style}">✓</span>`)
+      : '';
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
-        ${r.name}
+        ${tick}${r.name}
         ${ukcBadge}
         ${vlBadge}
       </td>
@@ -1125,9 +1138,14 @@ function cragCard(crag, f) {
     const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
       : `<span class="route-grade">${primaryG}</span>`;
+    const tick = r.user_style
+      ? (r.user_style==='Lead O/S'||r.user_style==='Lead rpt'
+          ? `<span class="ascent-tick ascent-tick-green" title="${r.user_style}">✓</span>`
+          : `<span class="ascent-tick ascent-tick-orange" title="${r.user_style}">✓</span>`)
+      : '';
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
-        ${r.name}
+        ${tick}${r.name}
         ${ukcBadge}
         ${vlBadge}
       </td>
