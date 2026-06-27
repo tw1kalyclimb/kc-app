@@ -15,6 +15,7 @@
     --shade:     #b0c8e0;
     --safe:      #2d7a4a;
     --unsafe:    #b03030;
+    --recent:    #b07a00;
     --unknown:   #888;
     --mid:       #6b5d52;
     --card-bg:   #ffffff;
@@ -177,7 +178,8 @@
   .badge-busy-low  { background: #e8f5e9; color: #2e7d32; }
   .badge-busy-mid  { background: #fff8e1; color: #f57f17; }
   .badge-busy-high { background: #fce4e4; color: #b71c1c; }
-  .badge-aspect { background: #f0f4ff; color: #3050a0; border: 1px solid #c0d0f0; }
+  .badge-aspect  { background: #f0f4ff; color: #3050a0; border: 1px solid #c0d0f0; }
+  .badge-walkin  { background: #f0f7ee; color: #2e6b2e; border: 1px solid #b0d4b0; }
   .badge-ukc { background: #1e4d8c; color: #fff; text-decoration: none; font-size: 0.62rem; padding: 1px 5px; }
   .badge-ukc:hover { background: #163a6a; }
   .badge-vl  { background: #e8401a; color: #fff; text-decoration: none; font-size: 0.62rem; padding: 1px 5px; }
@@ -322,6 +324,7 @@
   .bolt-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; }
   .bolt-safe    { background: var(--safe); }
   .bolt-unsafe  { background: var(--unsafe); }
+  .bolt-recent  { background: var(--recent); }
   .bolt-unknown { background: var(--unknown); }
   .stars-text   { color: var(--sun); letter-spacing: -1px; }
 
@@ -423,6 +426,7 @@
     <h2>Route Safety</h2>
     <div class="check-group">
       <label class="check-label"><input type="checkbox" id="boltSafe" checked><span class="bolt-dot bolt-safe"></span> Safe / rebolted</label>
+      <label class="check-label"><input type="checkbox" id="boltRecent" checked><span class="bolt-dot bolt-recent"></span> Recent (&lt;15yr)</label>
       <label class="check-label"><input type="checkbox" id="boltUnknown" checked><span class="bolt-dot bolt-unknown"></span> Unknown</label>
     </div>
 
@@ -537,12 +541,12 @@ function sunPosition(latDeg, lonDeg, year, month, day, hourUtc) {
   return [Math.round(az*10)/10, Math.round(elev*10)/10];
 }
 
-function computeSunSchedule(aspectDeg, year, month, day) {
+function computeSunSchedule(aspectDeg, year, month, day, lat = KALYMNOS_LAT, lng = KALYMNOS_LON) {
   if (aspectDeg == null) return null;
   const schedule = [];
   for (let hLocal = 6; hLocal <= 20; hLocal++) {
     const hUtc = hLocal - 3; // EEST = UTC+3
-    const [az, alt] = sunPosition(KALYMNOS_LAT, KALYMNOS_LON, year, month, day, hUtc);
+    const [az, alt] = sunPosition(lat, lng, year, month, day, hUtc);
     const diff = Math.abs(az - aspectDeg) % 360;
     const angDiff = diff <= 180 ? diff : 360 - diff;
     const isSunny = alt > 5 && angDiff <= 90;
@@ -593,7 +597,9 @@ function getSunSchedule(crag) {
   if (crag.aspect_deg == null) return null;
   const key = `${crag.id}-${currentDate.year}-${currentDate.month}-${currentDate.day}`;
   if (!sunScheduleCache[key]) {
-    sunScheduleCache[key] = computeSunSchedule(crag.aspect_deg, currentDate.year, currentDate.month, currentDate.day);
+    const lat = crag.lat ?? KALYMNOS_LAT;
+    const lng = crag.lng ?? KALYMNOS_LON;
+    sunScheduleCache[key] = computeSunSchedule(crag.aspect_deg, currentDate.year, currentDate.month, currentDate.day, lat, lng);
   }
   return sunScheduleCache[key];
 }
@@ -644,6 +650,7 @@ function getFilters() {
     minSun:      parseInt(document.getElementById('minSun').value),
     maxSun:      parseInt(document.getElementById('maxSun').value),
     boltSafe:    document.getElementById('boltSafe').checked,
+    boltRecent:  document.getElementById('boltRecent').checked,
     boltUnknown: document.getElementById('boltUnknown').checked,
     sortBy:      document.getElementById('sortBy').value,
     search:      document.getElementById('searchQuery').value.trim().toLowerCase(),
@@ -689,10 +696,15 @@ function buildSectors(crags) {
       const sName = route.sector || 'Unknown';
       const key = `${crag.id ?? crag.name}||${sName}`;
       if (!map.has(key)) {
+        const smeta = (crag.sectors_meta || {})[sName] || {};
         map.set(key, {
           id: key, name: sName, cragName: crag.name,
           displayName: `${crag.name} — ${sName}`,
           ukc_url: crag.ukc_url, aspect_raw: crag.aspect_raw, aspect_deg: crag.aspect_deg,
+          lat: crag.lat, lng: crag.lng,
+          sun_start: smeta.sun_start || null,
+          sun_end:   smeta.sun_end   || null,
+          walk_in:   smeta.walk_in   ?? null,
           routes: [],
         });
       }
@@ -742,6 +754,7 @@ function applyFilters(ov={}) {
     }
     const visibleInRange = routesInRange(crag, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
+      (r.bolt_status==='recent'&&f.boltRecent) ||
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
@@ -788,6 +801,7 @@ function applyFiltersSectors(f) {
     }
     const visibleInRange = routesInRange(s, f.gradeMinIdx, f.gradeMaxIdx).filter(r =>
       (r.bolt_status==='safe'&&f.boltSafe) ||
+      (r.bolt_status==='recent'&&f.boltRecent) ||
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
@@ -829,6 +843,7 @@ function resetFilters() {
   document.getElementById('minSun').value = 0;
   document.getElementById('maxSun').value = 12;
   document.getElementById('boltSafe').checked = true;
+  document.getElementById('boltRecent').checked = true;
   document.getElementById('boltUnknown').checked = true;
   document.getElementById('sortBy').value = 'norm_busy_asc';
   updateSliderLabels();
@@ -888,7 +903,7 @@ function sectorCard(sector, f) {
 
   const isExp = expandedCrags.has(cardKey);
   const filteredRoutes = routes
-    .filter(r => (r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown))
+    .filter(r => (r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='recent'&&f.boltRecent)||(r.bolt_status==='unknown'&&f.boltUnknown))
     .sort((a,b) => effectiveGradeIdx(a) - effectiveGradeIdx(b));
 
   const makeRow = r => {
@@ -922,6 +937,8 @@ function sectorCard(sector, f) {
 
   const aspectBadge = sector.aspect_raw
     ? `<span class="badge badge-aspect">faces ${sector.aspect_raw}</span>` : '';
+  const walkInBadge = sector.walk_in != null
+    ? `<span class="badge badge-walkin" title="Walk-in time">🥾 ${sector.walk_in}min</span>` : '';
   const sectorNameHtml = sector.ukc_url
     ? `<a href="${sector.ukc_url}" target="_blank" rel="noopener">${sector.displayName}</a>`
     : sector.displayName;
@@ -935,6 +952,7 @@ function sectorCard(sector, f) {
           <span class="badge ${busyCls}">${busyLbl}</span>
           <span class="badge badge-stars">${starsStr} ${sector.avg_star_rating.toFixed(1)}</span>
           ${aspectBadge}
+          ${walkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
         </div>
       </div>
@@ -950,6 +968,7 @@ function sectorCard(sector, f) {
         <span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span>
         ${sched.sunnyFrom ? `<span class="stat-sub">${sched.sunnyFrom}–${sched.sunnyUntil}</span>` : ''}
       </div>` : ''}
+      ${sector.walk_in != null ? `<div class="stat"><span class="stat-val">${sector.walk_in}min</span><span class="stat-label">Walk in</span></div>` : ''}
     </div>
     <div class="grade-bar">${barSegs}</div>
     ${sunHtml}
@@ -1003,7 +1022,7 @@ function cragCard(crag, f) {
 
   const isExp = expandedCrags.has(cragKey);
   const filteredRoutes = routes
-    .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='unknown'&&f.boltUnknown))
+    .filter(r=>(r.bolt_status==='safe'&&f.boltSafe)||(r.bolt_status==='recent'&&f.boltRecent)||(r.bolt_status==='unknown'&&f.boltUnknown))
     .sort((a,b)=>effectiveGradeIdx(a)-effectiveGradeIdx(b));
 
   // Group by sector, preserving order of first appearance
@@ -1044,15 +1063,23 @@ function cragCard(crag, f) {
     </tr>`;
   };
 
+  const smeta = crag.sectors_meta || {};
+
   const rows = sectorOrder.map(s => {
     const sectorRows = bySector[s].map(makeRow).join('');
-    const header = s ? `<tr class="sector-header-row"><td colspan="5">${s}</td></tr>` : '';
+    const sWalkIn = smeta[s]?.walk_in;
+    const walkInStr = sWalkIn != null ? ` <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:#d4e8d4;color:#2e6b2e;font-size:0.72em;font-weight:600;letter-spacing:0;text-transform:none;vertical-align:middle">🥾 ${sWalkIn}min</span>` : '';
+    const header = s ? `<tr class="sector-header-row"><td colspan="5">${s}${walkInStr}</td></tr>` : '';
     return header + sectorRows;
   }).join('');
 
   const aspectBadge = crag.aspect_raw
     ? `<span class="badge badge-aspect">faces ${crag.aspect_raw}</span>`
     : '';
+  const walkIns = Object.values(smeta).map(s => s.walk_in).filter(v => v != null);
+  const avgWalkIn = walkIns.length ? Math.round(walkIns.reduce((a,b)=>a+b,0)/walkIns.length) : null;
+  const cragWalkInBadge = avgWalkIn != null
+    ? `<span class="badge badge-walkin" title="Average walk-in time across sectors">🥾 ${avgWalkIn}min</span>` : '';
   const cragNameHtml = crag.ukc_url
     ? `<a href="${crag.ukc_url}" target="_blank" rel="noopener">${crag.name}</a>`
     : crag.name;
@@ -1066,6 +1093,7 @@ function cragCard(crag, f) {
           <span class="badge ${busyCls}">${busyLbl}</span>
           <span class="badge badge-stars">${starsStr} ${crag.avg_star_rating.toFixed(1)}</span>
           ${aspectBadge}
+          ${cragWalkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
         </div>
       </div>
