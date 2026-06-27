@@ -356,7 +356,7 @@
   <aside class="sidebar">
     <div class="filter-group" style="margin-bottom:10px">
       <input type="search" id="searchQuery" placeholder="Search crags, sectors, routes…"
-        oninput="applyFilters()"
+        oninput="scheduleSearch()" onblur="applyFilters()"
         style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-size:0.9rem;background:var(--surface);color:var(--text)">
     </div>
     <div class="mode-toggle">
@@ -604,7 +604,7 @@ function getSunSchedule(item) {
 async function loadData() {
   setLoading(true);
   try {
-    const resp = await fetch('data.json');
+    const resp = await fetch('data.json', {cache: 'no-cache'});
     if (!resp.ok) throw new Error('not found');
     const data = await resp.json();
     allCrags = data.crags || [];
@@ -626,9 +626,8 @@ async function loadData() {
     document.getElementById('cragList').innerHTML = `
       <div class="empty-state">
         <div class="icon">📂</div>
-        <p><strong>data.json not found</strong></p>
-        <p style="margin-top:8px">Run <code>python scraper.py</code> then place <code>data.json</code> next to <code>index.html</code>.<br>
-        For testing: <code>python sample_data.py</code></p>
+        <p><strong>Error: ${e.message}</strong></p>
+        <p style="margin-top:8px;font-family:monospace;font-size:0.8em">${e.stack||''}</p>
       </div>`;
     document.getElementById('dataStatus').textContent = 'No data';
   }
@@ -650,6 +649,15 @@ function getFilters() {
     sortBy:      document.getElementById('sortBy').value,
     search:      document.getElementById('searchQuery').value.trim().toLowerCase(),
   };
+}
+
+function buildHist(routes) {
+  const h = {};
+  for (const r of routes) {
+    const g = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
+    if (g) h[g] = (h[g]||0)+1;
+  }
+  return h;
 }
 
 function effectiveGradeIdx(r) {
@@ -880,12 +888,12 @@ function sectorCard(sector, f) {
   const b = sector._dynBusyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _stars = Math.min(5, Math.max(0, Math.round(sector.avg_star_rating || 0)));
-  const starsStr = '★'.repeat(_stars)+'☆'.repeat(5-_stars);
+  const _stars = Math.min(3, Math.max(0, Math.round(sector.avg_star_rating || 0)));
+  const starsStr = sector.avg_star_rating > 0 ? '★'.repeat(_stars)+'☆'.repeat(3-_stars) : '?';
   const gradeRange = sector.grade_min && sector.grade_max
     ? (sector.grade_min===sector.grade_max ? sector.grade_min : `${sector.grade_min}–${sector.grade_max}`) : '?';
 
-  const hist = sector.grades_histogram || {};
+  const hist = buildHist(sector.routes || []);
   const total = Object.entries(hist).reduce((s,[g,v])=>GRADE_IDX[g]!==undefined?s+v:s,0);
   const barSegs = gradeBarSegs(hist, total, f);
 
@@ -900,8 +908,10 @@ function sectorCard(sector, f) {
 
   const makeRow = r => {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
-    const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
-    const stars = '★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const _ukc = r.star_rating != null ? Math.min(3, Math.max(0, Math.round(r.star_rating))) : null;
+    const _vlur = r.vl_user_rating ?? null;
+    const stars = (_ukc !== null ? (_ukc > 0 ? '★'.repeat(_ukc) : '–') : '?')
+      + (_vlur !== null ? `<small style="color:var(--text-muted);margin-left:3px">VL:${_vlur.toFixed(1)}</small>` : '');
     const ukcBadge = r.ukc_url
       ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
       : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
@@ -942,7 +952,7 @@ function sectorCard(sector, f) {
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
-          <span class="badge badge-stars">${starsStr} ${sector.avg_star_rating.toFixed(1)}</span>
+          <span class="badge badge-stars">${starsStr}${sector.avg_star_rating > 0 ? ' '+sector.avg_star_rating.toFixed(1) : ''}</span>
           ${aspectBadge}
           ${walkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
@@ -985,13 +995,13 @@ function cragCard(crag, f) {
   const b = crag._dynBusyness ?? crag.normalised_busyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _cragStars = Math.min(5, Math.max(0, Math.round(crag.avg_star_rating || 0)));
-  const starsStr = '★'.repeat(_cragStars)+'☆'.repeat(5-_cragStars);
+  const _cragStars = Math.min(3, Math.max(0, Math.round(crag.avg_star_rating || 0)));
+  const starsStr = crag.avg_star_rating > 0 ? '★'.repeat(_cragStars)+'☆'.repeat(3-_cragStars) : '?';
   const gradeRange = crag.grade_min && crag.grade_max
     ? (crag.grade_min===crag.grade_max?crag.grade_min:`${crag.grade_min}–${crag.grade_max}`) : '?';
 
   // Grade histogram bar
-  const hist = crag.grades_histogram||{};
+  const hist = buildHist(crag.routes || []);
   const total = Object.entries(hist).reduce((s,[g,v])=>GRADE_IDX[g]!==undefined?s+v:s,0);
   const barSegs = gradeBarSegs(hist, total, f);
 
@@ -1020,8 +1030,10 @@ function cragCard(crag, f) {
 
   const makeRow = r => {
     const inR = effectiveGradeIdx(r) >= f.gradeMinIdx && effectiveGradeIdx(r) <= f.gradeMaxIdx;
-    const _rStars = Math.min(5, Math.max(0, Math.round(r.star_rating||0)));
-    const stars='★'.repeat(_rStars)+'☆'.repeat(5-_rStars);
+    const _ukc = r.star_rating != null ? Math.min(3, Math.max(0, Math.round(r.star_rating))) : null;
+    const _vlur = r.vl_user_rating ?? null;
+    const stars = (_ukc !== null ? (_ukc > 0 ? '★'.repeat(_ukc) : '–') : '?')
+      + (_vlur !== null ? `<small style="color:var(--text-muted);margin-left:3px">VL:${_vlur.toFixed(1)}</small>` : '');
     const ukcBadge = r.ukc_url
       ? `<a class="badge badge-ukc" href="${r.ukc_url}" target="_blank" rel="noopener">UKC</a>`
       : `<span class="badge badge-vl-unmatched" title="No UKC match found">UKC</span>`;
@@ -1075,7 +1087,7 @@ function cragCard(crag, f) {
         <div class="crag-badges">
           <span class="badge badge-grade">${gradeRange}</span>
           <span class="badge ${busyCls}">${busyLbl}</span>
-          <span class="badge badge-stars">${starsStr} ${crag.avg_star_rating.toFixed(1)}</span>
+          <span class="badge badge-stars">${starsStr}${crag.avg_star_rating > 0 ? ' '+crag.avg_star_rating.toFixed(1) : ''}</span>
           ${aspectBadge}
           ${cragWalkInBadge}
           ${inRange.length?`<span class="badge" style="background:#e8f0fe;color:#1a56db">${inRange.length} in range</span>`:''}
@@ -1264,6 +1276,8 @@ function updateSliderLabels() {
     el.classList.add('thumb-top');
   }, {passive: true});
 });
+let _searchDebounce;
+function scheduleSearch() { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(applyFilters, 400); }
 let _applyDebounce;
 ['gradeMin','gradeMax','minRoutes','minStars'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
