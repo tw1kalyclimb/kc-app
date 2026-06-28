@@ -459,6 +459,10 @@
         <option value="60">60+ min</option>
       </select>
     </div>
+	
+	<div class="check-group">
+      <label class="check-label"><input type="checkbox" id="includeTelendos"> Include Telendos</label>
+    </div>
 
     <h2>Route Safety</h2>
     <div class="check-group">
@@ -479,7 +483,7 @@
       <option value="name_asc">Name A–Z</option>
     </select>
 
-    <button class="apply-btn" onclick="applyFilters()">Apply Filters</button>
+
     <button class="reset-btn" onclick="resetFilters()">Reset</button>
   </aside>
 
@@ -675,9 +679,10 @@ function getFilters() {
     minStars:    parseFloat(document.getElementById('minStars').value),
     shadeAt:     document.getElementById('shadeAt').value === 'any' ? null : parseInt(document.getElementById('shadeAt').value),
     maxWalkIn:   document.getElementById('maxWalkIn').value === 'any' ? null : parseInt(document.getElementById('maxWalkIn').value),
-    boltSafe:    document.getElementById('boltSafe').checked,
-    boltRecent:  document.getElementById('boltRecent').checked,
-    boltUnknown: document.getElementById('boltUnknown').checked,
+    boltSafe:         document.getElementById('boltSafe').checked,
+    boltRecent:       document.getElementById('boltRecent').checked,
+    boltUnknown:      document.getElementById('boltUnknown').checked,
+    includeTelendos:  document.getElementById('includeTelendos').checked,
     sortBy:      document.getElementById('sortBy').value,
     search:      document.getElementById('searchQuery').value.trim().toLowerCase(),
   };
@@ -741,6 +746,7 @@ function buildSectors(crags) {
         map.set(key, {
           id: key, name: sName, cragName: crag.name,
           displayName: `${crag.name} — ${sName}`,
+          telendos: crag.telendos || false,
           ukc_url: crag.ukc_url, aspect_raw: crag.aspect_raw, aspect_deg: crag.aspect_deg,
           lat: crag.lat, lng: crag.lng,
           sun_start: smeta.sun_start || null,
@@ -789,6 +795,7 @@ function applyFilters(ov={}) {
 
   filteredCrags = allCrags.filter(crag => {
     if (crag.name === 'Unknown Crag') return false;
+    if (crag.telendos && !f.includeTelendos) return false;
     if (f.search) {
       const q = f.search;
       const nameMatch = crag.name.toLowerCase().includes(q);
@@ -843,6 +850,7 @@ function applyFilters(ov={}) {
 function applyFiltersSectors(f) {
   filteredSectors = allSectors.filter(s => {
     if (s.cragName === 'Unknown Crag') return false;
+    if (s.telendos && !f.includeTelendos) return false;
     if (f.search) {
       const q = f.search;
       const nameMatch = s.cragName.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
@@ -900,6 +908,7 @@ function resetFilters() {
   document.getElementById('boltSafe').checked = true;
   document.getElementById('boltRecent').checked = true;
   document.getElementById('boltUnknown').checked = true;
+  document.getElementById('includeTelendos').checked = false;
   document.getElementById('sortBy').value = 'norm_busy_asc';
   updateSliderLabels();
   applyFilters();
@@ -1376,8 +1385,12 @@ let _applyDebounce;
   });
 });
 
-document.getElementById('shadeAt').addEventListener('change', () => { applyFilters(); });
-document.getElementById('maxWalkIn').addEventListener('change', () => { applyFilters(); });
+['shadeAt','maxWalkIn','sortBy'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => { applyFilters(); });
+});
+['boltSafe','boltRecent','boltUnknown','includeTelendos'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => { applyFilters(); });
+});
 
 // ── AI bar toggle ─────────────────────────────────────────────────────────
 // ── Map ───────────────────────────────────────────────────────────────────
@@ -1388,9 +1401,11 @@ function toggleMapBar(label) {
   if (open) {
     if (!_leafletMap) {
       _leafletMap = L.map('cragsMap').setView([36.95, 26.98], 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 18,
+      const THUNDERFOREST_KEY = '21fec0ce461342d8afaf11626971154f';
+      L.tileLayer(`https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=${THUNDERFOREST_KEY}`, {
+        attribution: '© <a href="https://www.thunderforest.com/">Thunderforest</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        subdomains: 'abc',
+        maxZoom: 22,
       }).addTo(_leafletMap);
       updateMap();
     } else {
