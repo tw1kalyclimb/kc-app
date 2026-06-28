@@ -735,6 +735,16 @@ function computeDynBusyness(crags, minIdx, maxIdx) {
   });
 }
 
+function computeDynStars(crags, minIdx, maxIdx) {
+  crags.forEach(c => {
+    const inRange = routesInRange(c, minIdx, maxIdx);
+    const ukc = inRange.filter(r => r.star_rating > 0).map(r => r.star_rating);
+    const vl  = inRange.filter(r => r.vl_stars   > 0).map(r => r.vl_stars);
+    c._dynStarRating   = ukc.length ? ukc.reduce((a,b)=>a+b,0)/ukc.length : 0;
+    c._dynVlStarRating = vl.length  ? vl.reduce((a,b)=>a+b,0)/vl.length   : 0;
+  });
+}
+
 function buildSectors(crags) {
   const map = new Map();
   for (const crag of crags) {
@@ -809,7 +819,7 @@ function applyFilters(ov={}) {
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
-    if ((primaryGrade==='vl' ? crag.avg_vl_star_rating : crag.avg_star_rating) < f.minStars) return false;
+    if ((primaryGrade==='vl' ? crag._dynVlStarRating : crag._dynStarRating) < f.minStars) return false;
 
     // Shade-at filter: exclude crags that are sunny (not shaded) at the chosen hour
     if (f.shadeAt !== null) {
@@ -827,6 +837,7 @@ function applyFilters(ov={}) {
   });
 
   computeDynBusyness(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx);
+  computeDynStars(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx);
 
   filteredCrags.sort((a,b) => {
     const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
@@ -834,7 +845,7 @@ function applyFilters(ov={}) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
-      case 'stars_desc': { const k = primaryGrade==='vl' ? 'avg_vl_star_rating' : 'avg_star_rating'; return (b[k]||0) - (a[k]||0); }
+      case 'stars_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
       case 'routes_desc':    return b.route_count - a.route_count;
@@ -863,7 +874,7 @@ function applyFiltersSectors(f) {
       (r.bolt_status==='unknown'&&f.boltUnknown)
     );
     if (visibleInRange.length < f.minRoutes) return false;
-    if ((primaryGrade==='vl' ? s.avg_vl_star_rating : s.avg_star_rating) < f.minStars) return false;
+    if ((primaryGrade==='vl' ? s._dynVlStarRating : s._dynStarRating) < f.minStars) return false;
     if (f.shadeAt !== null) {
       const sched = getSunSchedule(s);
       if (sched !== null) {
@@ -878,6 +889,7 @@ function applyFiltersSectors(f) {
   });
 
   computeDynBusyness(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx);
+  computeDynStars(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx);
 
   filteredSectors.sort((a,b) => {
     const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
@@ -885,7 +897,7 @@ function applyFiltersSectors(f) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
-      case 'stars_desc': { const k = primaryGrade==='vl' ? 'avg_vl_star_rating' : 'avg_star_rating'; return (b[k]||0) - (a[k]||0); }
+      case 'stars_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
       case 'routes_desc':    return b.route_count - a.route_count;
@@ -949,8 +961,8 @@ function sectorCard(sector, f) {
   const b = sector._dynBusyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _sAvg = (primaryGrade === 'vl' ? sector.avg_vl_star_rating : sector.avg_star_rating) || 0;
-  const _sAlt = (primaryGrade === 'vl' ? sector.avg_star_rating : sector.avg_vl_star_rating) || 0;
+  const _sAvg = (primaryGrade === 'vl' ? sector._dynVlStarRating : sector._dynStarRating) || 0;
+  const _sAlt = (primaryGrade === 'vl' ? sector._dynStarRating : sector._dynVlStarRating) || 0;
   const _stars = Math.min(3, Math.max(0, Math.round(_sAvg)));
   const _starsAlt = Math.min(3, Math.max(0, Math.round(_sAlt)));
   const starsStr = _sAvg > 0 ? '★'.repeat(_stars)+'☆'.repeat(3-_stars) : '?';
@@ -1069,8 +1081,8 @@ function cragCard(crag, f) {
   const b = crag._dynBusyness ?? crag.normalised_busyness ?? 0;
   const busyCls = b<0.3?'badge-busy-low':b<0.65?'badge-busy-mid':'badge-busy-high';
   const busyLbl = b<0.3?'Quiet':b<0.65?'Moderate':'Busy';
-  const _cAvg = (primaryGrade === 'vl' ? crag.avg_vl_star_rating : crag.avg_star_rating) || 0;
-  const _cAlt = (primaryGrade === 'vl' ? crag.avg_star_rating : crag.avg_vl_star_rating) || 0;
+  const _cAvg = (primaryGrade === 'vl' ? crag._dynVlStarRating : crag._dynStarRating) || 0;
+  const _cAlt = (primaryGrade === 'vl' ? crag._dynStarRating : crag._dynVlStarRating) || 0;
   const _cragStars = Math.min(3, Math.max(0, Math.round(_cAvg)));
   const _cragStarsAlt = Math.min(3, Math.max(0, Math.round(_cAlt)));
   const starsStr = _cAvg > 0 ? '★'.repeat(_cragStars)+'☆'.repeat(3-_cragStars) : '?';
