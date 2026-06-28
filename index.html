@@ -691,18 +691,15 @@ function getFilters() {
 function buildHist(routes) {
   const h = {};
   for (const r of routes) {
-    const g = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
+    const g = primaryGrade === 'vl' ? (r.vl_grade || r.grade) : (r.ukc_grade || r.grade);
     if (g) h[g] = (h[g]||0)+1;
   }
   return h;
 }
 
 function effectiveGradeIdx(r) {
-  if (primaryGrade === 'vl') {
-    const vlIdx = GRADE_IDX[r.vl_grade];
-    if (vlIdx !== undefined) return vlIdx;
-  }
-  return GRADE_IDX[r.grade] ?? 99;
+  const g = primaryGrade === 'vl' ? (r.vl_grade || r.grade) : (r.ukc_grade || r.grade);
+  return GRADE_IDX[g] ?? 99;
 }
 
 function routesInRange(crag, minIdx, maxIdx) {
@@ -996,8 +993,8 @@ function sectorCard(sector, f) {
     const vlBadge = r.vl_url
       ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
       : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
-    const primaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
-    const secondaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.grade : r.vl_grade;
+    const primaryG = primaryGrade === 'vl' ? (r.vl_grade || r.grade) : (r.ukc_grade || r.grade);
+    const secondaryG = primaryGrade === 'vl' ? r.ukc_grade : r.vl_grade;
     const secondaryLabel = primaryGrade === 'vl' ? 'UKC grade' : 'VL grade';
     const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
@@ -1131,8 +1128,8 @@ function cragCard(crag, f) {
     const vlBadge = r.vl_url
       ? `<a class="badge badge-vl" href="${r.vl_url}" target="_blank" rel="noopener">VL</a>`
       : `<span class="badge badge-vl-unmatched" title="No VL match found">VL</span>`;
-    const primaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.vl_grade : r.grade;
-    const secondaryG = (primaryGrade === 'vl' && r.vl_grade) ? r.grade : r.vl_grade;
+    const primaryG = primaryGrade === 'vl' ? (r.vl_grade || r.grade) : (r.ukc_grade || r.grade);
+    const secondaryG = primaryGrade === 'vl' ? r.ukc_grade : r.vl_grade;
     const secondaryLabel = primaryGrade === 'vl' ? 'UKC grade' : 'VL grade';
     const gradeHtml = (secondaryG && secondaryG !== primaryG)
       ? `<span class="route-grade">${primaryG}</span><span class="route-grade-alt" title="${secondaryLabel}"> / ${secondaryG}</span>`
