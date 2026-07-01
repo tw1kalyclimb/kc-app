@@ -471,10 +471,21 @@
       <label class="check-label"><input type="checkbox" id="boltUnknown" checked><span class="bolt-dot bolt-unknown"></span> Unknown</label>
     </div>
 
+    <h2>Trip Dates</h2>
+    <div class="filter-group">
+      <div class="filter-label">From</div>
+      <input type="date" id="tripStart" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:0.82rem;font-family:var(--font-ui)">
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">To</div>
+      <input type="date" id="tripEnd" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:0.82rem;font-family:var(--font-ui)">
+    </div>
+
     <h2>Sort By</h2>
     <select id="sortBy">
       <option value="norm_busy_asc">Quietest first</option>
       <option value="norm_busy_desc">Busiest first</option>
+      <option value="combo_desc">Quiet &amp; well-rated</option>
       <option value="stars_desc">Highest rated first</option>
       <option value="sun_desc">Most sun first</option>
       <option value="sun_asc">Least sun first (shade seekers)</option>
@@ -647,6 +658,7 @@ async function loadData() {
     allCrags = data.crags || [];
     allSectors = buildSectors(allCrags);
     busynessWindowStart = data.meta?.busyness_window_start || '';
+    loadSavedFilters();
     const status = document.getElementById('dataStatus');
     const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '?' : d.toLocaleDateString('en-GB', {day:'numeric',month:'short'}); };
     const ukcDate   = data.meta?.scraped_at      ? ` · UKC ${fmtDate(data.meta.scraped_at)}`      : '';
@@ -687,6 +699,8 @@ function getFilters() {
     includeTelendos:  document.getElementById('includeTelendos').checked,
     sortBy:      document.getElementById('sortBy').value,
     search:      document.getElementById('searchQuery').value.trim().toLowerCase(),
+    tripStart:   (document.getElementById('tripStart').value || '').slice(5) || null,
+    tripEnd:     (document.getElementById('tripEnd').value   || '').slice(5) || null,
   };
 }
 
@@ -744,6 +758,25 @@ function computeDynStars(crags, minIdx, maxIdx) {
   });
 }
 
+function computeTripBusyness(crags, minIdx, maxIdx, startMmdd, endMmdd) {
+  crags.forEach(c => {
+    if (!startMmdd || !endMmdd) { c._tripBusy = null; return; }
+    const inRange = routesInRange(c, minIdx, maxIdx);
+    if (!inRange.length) { c._tripBusy = null; return; }
+    const years = new Set();
+    let tripLogs = 0;
+    for (const r of inRange) {
+      for (const d of (r.logs || [])) {
+        if (!d) continue;
+        years.add(d.slice(0, 4));
+        const mmdd = d.slice(5);
+        if (mmdd >= startMmdd && mmdd <= endMmdd) tripLogs++;
+      }
+    }
+    c._tripBusy = tripLogs / (years.size || 1) / inRange.length;
+  });
+}
+
 function buildSectors(crags) {
   const map = new Map();
   for (const crag of crags) {
@@ -798,8 +831,61 @@ function setPrimaryGrade(source) {
   applyFilters();
 }
 
+// ── Filter persistence ────────────────────────────────────────────────────
+const _STORAGE_KEY = 'kalycrags_filters';
+
+function saveFilters() {
+  try {
+    localStorage.setItem(_STORAGE_KEY, JSON.stringify({
+      gradeMin:        document.getElementById('gradeMin').value,
+      gradeMax:        document.getElementById('gradeMax').value,
+      minRoutes:       document.getElementById('minRoutes').value,
+      minStars:        document.getElementById('minStars').value,
+      shadeAt:         document.getElementById('shadeAt').value,
+      maxWalkIn:       document.getElementById('maxWalkIn').value,
+      boltSafe:        document.getElementById('boltSafe').checked,
+      boltRecent:      document.getElementById('boltRecent').checked,
+      boltUnknown:     document.getElementById('boltUnknown').checked,
+      includeTelendos: document.getElementById('includeTelendos').checked,
+      sortBy:          document.getElementById('sortBy').value,
+      tripStart:       document.getElementById('tripStart').value,
+      tripEnd:         document.getElementById('tripEnd').value,
+      primaryGrade, currentMode,
+    }));
+  } catch(e) {}
+}
+
+function loadSavedFilters() {
+  try {
+    const raw = localStorage.getItem(_STORAGE_KEY);
+    if (!raw) return;
+    const f = JSON.parse(raw);
+    const set = (id, val) => { if (val != null) document.getElementById(id).value = val; };
+    const chk = (id, val) => { if (val != null) document.getElementById(id).checked = val; };
+    set('gradeMin', f.gradeMin); set('gradeMax', f.gradeMax);
+    set('minRoutes', f.minRoutes); set('minStars', f.minStars);
+    set('shadeAt', f.shadeAt); set('maxWalkIn', f.maxWalkIn);
+    set('sortBy', f.sortBy);
+    set('tripStart', f.tripStart); set('tripEnd', f.tripEnd);
+    chk('boltSafe', f.boltSafe); chk('boltRecent', f.boltRecent);
+    chk('boltUnknown', f.boltUnknown); chk('includeTelendos', f.includeTelendos);
+    if (f.primaryGrade) {
+      primaryGrade = f.primaryGrade;
+      const radio = document.querySelector(`input[name="primaryGrade"][value="${f.primaryGrade}"]`);
+      if (radio) radio.checked = true;
+    }
+    if (f.currentMode) {
+      currentMode = f.currentMode;
+      document.getElementById('modeCrags').classList.toggle('active', f.currentMode === 'crags');
+      document.getElementById('modeSectors').classList.toggle('active', f.currentMode === 'sectors');
+    }
+    updateSliderLabels();
+  } catch(e) {}
+}
+
 function applyFilters(ov={}) {
   const f = {...getFilters(), ...ov};
+  saveFilters();
   if (currentMode === 'sectors') { applyFiltersSectors(f); return; }
 
   filteredCrags = allCrags.filter(crag => {
@@ -837,6 +923,7 @@ function applyFilters(ov={}) {
 
   computeDynBusyness(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx);
   computeDynStars(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx);
+  computeTripBusyness(filteredCrags, f.gradeMinIdx, f.gradeMaxIdx, f.tripStart, f.tripEnd);
 
   filteredCrags.sort((a,b) => {
     const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
@@ -844,6 +931,7 @@ function applyFilters(ov={}) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
+      case 'combo_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return ((1-(b._dynBusyness??0))*(b[k]||0)) - ((1-(a._dynBusyness??0))*(a[k]||0)); }
       case 'stars_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
@@ -889,6 +977,7 @@ function applyFiltersSectors(f) {
 
   computeDynBusyness(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx);
   computeDynStars(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx);
+  computeTripBusyness(filteredSectors, f.gradeMinIdx, f.gradeMaxIdx, f.tripStart, f.tripEnd);
 
   filteredSectors.sort((a,b) => {
     const sunA = getSunSchedule(a)?.totalSunHours ?? 0;
@@ -896,6 +985,7 @@ function applyFiltersSectors(f) {
     switch(f.sortBy) {
       case 'norm_busy_asc':  return (a._dynBusyness??1) - (b._dynBusyness??1);
       case 'norm_busy_desc': return (b._dynBusyness??0) - (a._dynBusyness??0);
+      case 'combo_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return ((1-(b._dynBusyness??0))*(b[k]||0)) - ((1-(a._dynBusyness??0))*(a[k]||0)); }
       case 'stars_desc': { const k = primaryGrade==='vl' ? '_dynVlStarRating' : '_dynStarRating'; return (b[k]||0) - (a[k]||0); }
       case 'sun_desc':       return sunB - sunA;
       case 'sun_asc':        return sunA - sunB;
@@ -921,6 +1011,8 @@ function resetFilters() {
   document.getElementById('boltUnknown').checked = true;
   document.getElementById('includeTelendos').checked = false;
   document.getElementById('sortBy').value = 'norm_busy_asc';
+  document.getElementById('tripStart').value = '';
+  document.getElementById('tripEnd').value = '';
   updateSliderLabels();
   applyFilters();
 }
@@ -1050,6 +1142,7 @@ function sectorCard(sector, f) {
       <div class="stat" title="Recent logs per route in selected grade range, normalised">
         <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
       </div>
+      ${sector._tripBusy != null ? `<div class="stat" title="Avg ascents per route per year during your trip dates (historical)"><span class="stat-val">${sector._tripBusy.toFixed(1)}</span><span class="stat-label">Trip asc/route</span></div>` : ''}
       <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe Routes</span></div>
       ${sched ? `<div class="stat"><span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span></div>` : ''}
       ${sector.walk_in != null ? `<div class="stat"><span class="stat-val">${sector.walk_in}min</span><span class="stat-label">Walk in</span></div>` : ''}
@@ -1210,6 +1303,7 @@ function cragCard(crag, f) {
         <span class="stat-val">${normBusy}</span>
         <span class="stat-label">Busyness</span>
       </div>
+      ${crag._tripBusy != null ? `<div class="stat" title="Avg ascents per route per year during your trip dates (historical)"><span class="stat-val">${crag._tripBusy.toFixed(1)}</span><span class="stat-label">Trip asc/route</span></div>` : ''}
       <div class="stat">
         <span class="stat-val">${crag.safe_route_count??'?'}</span>
         <span class="stat-label">Safe Routes</span>
@@ -1396,7 +1490,7 @@ let _applyDebounce;
   });
 });
 
-['shadeAt','maxWalkIn','sortBy'].forEach(id => {
+['shadeAt','maxWalkIn','sortBy','tripStart','tripEnd'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => { applyFilters(); });
 });
 ['boltSafe','boltRecent','boltUnknown','includeTelendos'].forEach(id => {
