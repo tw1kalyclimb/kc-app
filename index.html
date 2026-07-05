@@ -325,6 +325,7 @@
   }
   .ascent-tick-green  { background: #2a8a3e; }
   .ascent-tick-orange { background: #c07010; }
+  .ascent-wish { display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; border-radius:50%; background:#c07010; color:#fff; font-size:0.72em; font-weight:800; margin-right:5px; cursor:default; flex-shrink:0; vertical-align:middle; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--mid); }
   .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
@@ -1098,9 +1099,10 @@ function sectorCard(sector, f) {
           ? `<span class="ascent-tick ascent-tick-green" title="${r.user_style}">✓</span>`
           : `<span class="ascent-tick ascent-tick-orange" title="${r.user_style}">✓</span>`)
       : '';
+    const wish = r.user_wishlist ? `<span class="ascent-wish" title="On your wishlist">★</span>` : '';
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
-        ${tick}${r.name}
+        ${tick}${wish}${r.name}
         ${primaryGrade === 'vl' ? vlBadge + ' ' + ukcBadge : ukcBadge + ' ' + vlBadge}
       </td>
       <td>${gradeHtml}</td>
@@ -1143,6 +1145,7 @@ function sectorCard(sector, f) {
         <span class="stat-val">${normBusy}</span><span class="stat-label">Busyness</span>
       </div>
       ${sector._tripBusy != null ? `<div class="stat" title="Avg ascents per route per year during your trip dates (historical)"><span class="stat-val">${sector._tripBusy.toFixed(1)}</span><span class="stat-label">Trip asc/route</span></div>` : ''}
+      ${inRange.filter(r=>r.user_wishlist).length > 0 ? `<div class="stat" title="Wishlisted routes in selected grade range"><span class="stat-val">★ ${inRange.filter(r=>r.user_wishlist).length}</span><span class="stat-label">Wishlist</span></div>` : ''}
       <div class="stat"><span class="stat-val">${sector.safe_route_count??'?'}</span><span class="stat-label">Safe Routes</span></div>
       ${sched ? `<div class="stat"><span class="stat-val">${sched.totalSunHours}h</span><span class="stat-label">Sun hrs</span></div>` : ''}
       ${sector.walk_in != null ? `<div class="stat"><span class="stat-val">${sector.walk_in}min</span><span class="stat-label">Walk in</span></div>` : ''}
@@ -1234,9 +1237,10 @@ function cragCard(crag, f) {
           ? `<span class="ascent-tick ascent-tick-green" title="${r.user_style}">✓</span>`
           : `<span class="ascent-tick ascent-tick-orange" title="${r.user_style}">✓</span>`)
       : '';
+    const wish = r.user_wishlist ? `<span class="ascent-wish" title="On your wishlist">★</span>` : '';
     return `<tr style="${inR?'':'opacity:0.38'}">
       <td>
-        ${tick}${r.name}
+        ${tick}${wish}${r.name}
         ${primaryGrade === 'vl' ? vlBadge + ' ' + ukcBadge : ukcBadge + ' ' + vlBadge}
       </td>
       <td>${gradeHtml}</td>
@@ -1304,6 +1308,7 @@ function cragCard(crag, f) {
         <span class="stat-label">Busyness</span>
       </div>
       ${crag._tripBusy != null ? `<div class="stat" title="Avg ascents per route per year during your trip dates (historical)"><span class="stat-val">${crag._tripBusy.toFixed(1)}</span><span class="stat-label">Trip asc/route</span></div>` : ''}
+      ${inRange.filter(r=>r.user_wishlist).length > 0 ? `<div class="stat" title="Wishlisted routes in selected grade range"><span class="stat-val">★ ${inRange.filter(r=>r.user_wishlist).length}</span><span class="stat-label">Wishlist</span></div>` : ''}
       <div class="stat">
         <span class="stat-val">${crag.safe_route_count??'?'}</span>
         <span class="stat-label">Safe Routes</span>
